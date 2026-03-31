@@ -55,7 +55,10 @@ export default {
           DEFAULT: "hsl(var(--cream))",
           muted: "hsl(var(--cream-muted))",
         },
-        "blue-accent": "hsl(var(--blue-accent))",
+        "blue-accent": {
+          DEFAULT: "hsl(var(--blue-accent))",
+          light: "hsl(var(--blue-accent-light))",
+        },
         "green-accent": "hsl(var(--green-accent))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
