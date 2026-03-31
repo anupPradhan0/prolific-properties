@@ -34,7 +34,7 @@ const Navbar = () => (
       <div className="flex items-center gap-3">
         <span className="hidden xl:block text-sm text-muted-foreground">Bhubaneswar · Odisha</span>
         <Button asChild size="lg">
-          <a href="#contact">Get in touch</a>
+          <a href="/contact">Get in touch</a>
         </Button>
       </div>
     </motion.nav>

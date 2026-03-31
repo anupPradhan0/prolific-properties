@@ -4,7 +4,8 @@ const footerLinks = [
   { label: "Listings", href: "#listings" },
   { label: "Search", href: "#search" },
   { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const Footer = () => (
