@@ -13,6 +13,19 @@ const upsertMeta = (selector: string, attr: "name" | "property", key: string, co
   tag.setAttribute("content", content);
 };
 
+const upsertScript = (id: string, json: Record<string, unknown>) => {
+  let script = document.head.querySelector<HTMLScriptElement>(`script[data-seo-id="${id}"]`);
+
+  if (!script) {
+    script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-seo-id", id);
+    document.head.appendChild(script);
+  }
+
+  script.textContent = JSON.stringify(json);
+};
+
 const upsertCanonical = (href: string) => {
   let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
 
@@ -31,16 +44,52 @@ const PrivacyPolicy = () => {
     const description =
       "Read how Prolific Properties collects, uses, and protects your information when you browse listings or contact our team.";
     const canonicalUrl = `${window.location.origin}/privacy-policy`;
+    const imageUrl = `${window.location.origin}/og-image.svg`;
 
     document.title = title;
     upsertMeta('meta[name="description"]', "name", "description", description);
+    upsertMeta(
+      'meta[name="keywords"]',
+      "name",
+      "keywords",
+      "privacy policy, data protection, real estate privacy, prolific properties privacy",
+    );
     upsertMeta('meta[name="robots"]', "name", "robots", "index,follow");
+    upsertMeta('meta[property="og:site_name"]', "property", "og:site_name", "Prolific Properties");
+    upsertMeta('meta[property="og:type"]', "property", "og:type", "article");
     upsertMeta('meta[property="og:title"]', "property", "og:title", title);
     upsertMeta('meta[property="og:description"]', "property", "og:description", description);
     upsertMeta('meta[property="og:url"]', "property", "og:url", canonicalUrl);
+    upsertMeta('meta[property="og:image"]', "property", "og:image", imageUrl);
+    upsertMeta(
+      'meta[property="og:image:alt"]',
+      "property",
+      "og:image:alt",
+      "Privacy Policy page for Prolific Properties",
+    );
+    upsertMeta('meta[name="twitter:card"]', "name", "twitter:card", "summary_large_image");
     upsertMeta('meta[name="twitter:title"]', "name", "twitter:title", title);
     upsertMeta('meta[name="twitter:description"]', "name", "twitter:description", description);
+    upsertMeta('meta[name="twitter:image"]', "name", "twitter:image", imageUrl);
     upsertCanonical(canonicalUrl);
+
+    upsertScript("privacy-policy-webpage", {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Privacy Policy",
+      description,
+      url: canonicalUrl,
+      isPartOf: {
+        "@type": "WebSite",
+        name: "Prolific Properties",
+        url: `${window.location.origin}/`,
+      },
+      about: {
+        "@type": "Thing",
+        name: "Data privacy policy",
+      },
+      inLanguage: "en-IN",
+    });
   }, []);
 
   return (
