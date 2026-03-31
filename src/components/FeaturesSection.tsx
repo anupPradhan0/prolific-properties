@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 
 const reasons = [
   {
@@ -23,12 +25,96 @@ const reasons = [
   },
 ];
 
-const tabs = ["Buy", "Rent", "Commercial"];
-const propertyTypes = ["Apartment", "Villa", "Plot", "Commercial"];
+const tabs = [
+  { label: "Buy", value: "buy" },
+  { label: "Rent", value: "rent" },
+  { label: "Commercial", value: "commercial" },
+];
+
+const propertyTypes = [
+  { label: "Apartment", value: "apartment" },
+  { label: "Villa", value: "villa" },
+  { label: "Plot", value: "plot" },
+  { label: "Commercial", value: "commercial" },
+];
+
+const budgetConfig = {
+  buy: { min: 10, max: 500, defaultMin: 40, defaultMax: 150, step: 5 },
+  rent: { min: 5, max: 200, defaultMin: 20, defaultMax: 60, step: 5 },
+  commercial: { min: 20, max: 700, defaultMin: 60, defaultMax: 300, step: 10 },
+};
+
+const formatSaleBudget = (valueInLakhs: number) => {
+  if (valueInLakhs >= 100) {
+    const valueInCrores = valueInLakhs / 100;
+    const formatted = Number.isInteger(valueInCrores)
+      ? valueInCrores.toFixed(0)
+      : valueInCrores.toFixed(2).replace(/\.00$/, "");
+
+    return `₹${formatted}Cr`;
+  }
+
+  return `₹${valueInLakhs}L`;
+};
+
+const formatRentBudget = (valueInThousands: number) => `₹${valueInThousands}K`;
 
 const FeaturesSection = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [activeType, setActiveType] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initialIntent = tabs.find((tab) => tab.value === searchParams.get("intent"))?.value ?? "buy";
+  const initialTabIndex = tabs.findIndex((tab) => tab.value === initialIntent);
+  const initialType = propertyTypes.find((type) => type.value === searchParams.get("type"))?.value ?? "apartment";
+  const initialTypeIndex = propertyTypes.findIndex((type) => type.value === initialType);
+
+  const [activeTab, setActiveTab] = useState(initialTabIndex >= 0 ? initialTabIndex : 0);
+  const [activeType, setActiveType] = useState(initialTypeIndex >= 0 ? initialTypeIndex : 0);
+  const [locationQuery, setLocationQuery] = useState(searchParams.get("q") ?? "");
+
+  const [minBudget, setMinBudget] = useState(() => {
+    const defaultValue = budgetConfig[initialIntent].defaultMin;
+    const parsedValue = Number(searchParams.get("min"));
+    return Number.isFinite(parsedValue) ? parsedValue : defaultValue;
+  });
+
+  const [maxBudget, setMaxBudget] = useState(() => {
+    const defaultValue = budgetConfig[initialIntent].defaultMax;
+    const parsedValue = Number(searchParams.get("max"));
+    return Number.isFinite(parsedValue) ? parsedValue : defaultValue;
+  });
+
+  const intent = tabs[activeTab]?.value ?? "buy";
+  const budgetMeta = budgetConfig[intent];
+  const budgetLabel = useMemo(() => {
+    if (intent === "rent") {
+      return `${formatRentBudget(minBudget)} — ${formatRentBudget(maxBudget)}`;
+    }
+
+    return `${formatSaleBudget(minBudget)} — ${formatSaleBudget(maxBudget)}`;
+  }, [intent, maxBudget, minBudget]);
+
+  const handleTabChange = (nextTabIndex: number) => {
+    const nextIntent = tabs[nextTabIndex].value;
+    const nextBudget = budgetConfig[nextIntent];
+
+    setActiveTab(nextTabIndex);
+    setMinBudget(nextBudget.defaultMin);
+    setMaxBudget(nextBudget.defaultMax);
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setSearchParams({
+      intent,
+      q: locationQuery.trim(),
+      min: String(minBudget),
+      max: String(maxBudget),
+      type: propertyTypes[activeType].value,
+    });
+
+    document.getElementById("listings")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <section id="about" className="scroll-mt-24 py-20">
@@ -70,40 +156,53 @@ const FeaturesSection = () => {
           <div id="search" className="rounded-[31px] bg-background p-6 md:p-8">
             <div className="flex flex-col gap-2">
               <span className="section-label">Search Properties</span>
-              <h3 className="text-[2.3rem] leading-tight text-foreground">Set your preferences and let the shortlisting start.</h3>
+              <h3 className="text-[clamp(1.9rem,4.5vw,2.8rem)] leading-tight text-foreground">Set your preferences and let the shortlisting start.</h3>
               <p className="text-sm leading-6 text-muted-foreground">
                 Simple filters, stronger contrast, and a cleaner flow for buyers, renters, and commercial clients.
               </p>
             </div>
 
-            <div className="mt-8 space-y-5">
+            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <div className="grid gap-2 rounded-[22px] bg-surface-strong p-1 sm:grid-cols-3">
                 {tabs.map((tab, index) => (
                   <button
-                    key={tab}
-                    onClick={() => setActiveTab(index)}
+                    key={tab.value}
+                    type="button"
+                    onClick={() => handleTabChange(index)}
                     className={`rounded-[18px] px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] transition-colors ${
                       activeTab === index ? "bg-primary text-primary-foreground shadow-panel" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {tab}
+                    {tab.label}
                   </button>
                 ))}
               </div>
 
-              <Input placeholder="Location, project, or locality" />
+              <Input
+                placeholder="Location, project, or locality"
+                value={locationQuery}
+                onChange={(event) => setLocationQuery(event.target.value)}
+              />
 
               <div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Budget range</span>
-                  <span className="font-semibold text-primary">₹40L — ₹1.5Cr</span>
+                  <span className="font-semibold text-primary">{budgetLabel}</span>
                 </div>
-                <div className="mt-3 h-2 rounded-full bg-secondary">
-                  <div className="relative h-2 w-[62%] rounded-full bg-primary">
-                    <div className="absolute -left-1 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-4 border-background bg-primary" />
-                    <div className="absolute -right-1 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-4 border-background bg-primary" />
-                  </div>
-                </div>
+                <Slider
+                  className="mt-4"
+                  min={budgetMeta.min}
+                  max={budgetMeta.max}
+                  step={budgetMeta.step}
+                  minStepsBetweenThumbs={1}
+                  value={[minBudget, maxBudget]}
+                  onValueChange={(nextRange) => {
+                    const [nextMin, nextMax] = nextRange;
+                    setMinBudget(nextMin);
+                    setMaxBudget(nextMax);
+                  }}
+                  aria-label={["Minimum budget", "Maximum budget"]}
+                />
               </div>
 
               <div>
@@ -111,7 +210,8 @@ const FeaturesSection = () => {
                 <div className="grid gap-3 sm:grid-cols-2">
                   {propertyTypes.map((type, index) => (
                     <button
-                      key={type}
+                      key={type.value}
+                      type="button"
                       onClick={() => setActiveType(index)}
                       className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${
                         activeType === index
@@ -119,16 +219,16 @@ const FeaturesSection = () => {
                           : "border-border bg-surface text-muted-foreground hover:border-primary/20 hover:text-foreground"
                       }`}
                     >
-                      {type}
+                      {type.label}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <Button size="xl" className="w-full">
+              <Button type="submit" size="xl" className="w-full">
                 Find properties
               </Button>
-            </div>
+            </form>
           </div>
         </motion.div>
       </div>
