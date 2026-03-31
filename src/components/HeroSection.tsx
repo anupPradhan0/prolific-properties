@@ -1,75 +1,108 @@
 import { motion } from "framer-motion";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.12, duration: 0.7 } }),
-};
+import { Button } from "@/components/ui/button";
+
+const trustStats = [
+  { value: "₹50Cr+", label: "Closed value" },
+  { value: "1,200+", label: "Happy families" },
+  { value: "12 yrs", label: "Local expertise" },
+];
+
+const quickFacts = [
+  { title: "2,800 sqft", subtitle: "Wide premium layout" },
+  { title: "4 BHK", subtitle: "Family-first planning" },
+  { title: "Ready visits", subtitle: "Fast shortlisting support" },
+];
 
 const HeroSection = () => (
-  <section className="grid grid-cols-1 lg:grid-cols-2 min-h-[480px]">
-    {/* Left */}
-    <div className="bg-background p-10 md:p-14 flex flex-col justify-between">
-      <div>
-        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="flex items-center gap-2.5 mb-7">
-          <div className="w-8 h-px bg-primary" />
-          <span className="text-[11px] tracking-[2.5px] text-primary uppercase font-medium">Premium Real Estate</span>
-        </motion.div>
-        <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1} className="font-display text-4xl md:text-[52px] font-light leading-[1.1] text-foreground mb-5">
-          Where <strong className="font-semibold italic text-primary">Luxury</strong><br />Meets<br />Living.
-        </motion.h1>
-        <motion.p variants={fadeUp} initial="hidden" animate="visible" custom={2} className="text-sm text-muted-foreground leading-relaxed max-w-[360px] mb-9 font-light">
-          Prolific Properties curates the finest residential and commercial spaces across Odisha — built for those who demand the extraordinary.
-        </motion.p>
-        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3} className="flex gap-3">
-          <button className="bg-primary text-primary-foreground text-xs px-7 py-3.5 rounded tracking-widest uppercase font-medium font-body hover:bg-blue-accent-light transition-colors">
-            Explore Listings
-          </button>
-          <button className="border border-foreground/20 text-foreground text-xs px-7 py-3.5 rounded tracking-widest uppercase font-body hover:border-primary hover:text-primary transition-colors">
-            Our Story
-          </button>
-        </motion.div>
-      </div>
-      <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={4} className="flex gap-6 mt-10 pt-7 border-t border-border">
-        {[
-          { val: "₹50Cr+", label: "Total Sales Value" },
-          { val: "1,200+", label: "Happy Families" },
-          { val: "12 Yrs", label: "Of Excellence" },
-        ].map((s, i) => (
-          <div key={i} className="flex items-center gap-6">
-            <div>
-              <div className="font-display text-[22px] text-primary font-semibold">{s.val}</div>
-              <div className="text-[10px] text-muted-foreground tracking-widest uppercase mt-0.5">{s.label}</div>
-            </div>
-            {i < 2 && <div className="w-px h-10 bg-border" />}
-          </div>
-        ))}
-      </motion.div>
-    </div>
+  <section id="top" className="scroll-mt-24 pb-16 pt-10 md:pb-20 md:pt-16">
+    <div className="container grid gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+      >
+        <span className="section-label">Premium Real Estate</span>
 
-    {/* Right */}
-    <div className="grid grid-rows-2">
-      <div className="bg-primary/5 flex items-center justify-center border-b border-border relative p-6">
-        <div className="text-center z-10">
-          <div className="font-display text-[13px] text-primary/60 tracking-[2px] uppercase mb-1.5">Featured</div>
-          <div className="font-display text-[28px] text-foreground font-light">Skyline Villa</div>
-          <div className="text-[11px] text-muted-foreground tracking-wider mt-1">Patia, Bhubaneswar</div>
+        <h1 className="mt-6 max-w-[11ch] text-[clamp(3.4rem,8vw,6.4rem)] leading-[0.92] text-foreground">
+          Where <em className="not-italic font-semibold text-primary">Luxury</em>
+          <br />
+          Meets Living.
+        </h1>
+
+        <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
+          Prolific Properties helps buyers, renters, and investors discover premium homes across Odisha with verified listings, clear pricing, and modern guidance from first visit to final paperwork.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Button asChild size="xl">
+            <a href="#listings">Explore listings</a>
+          </Button>
+          <Button asChild variant="outline" size="xl">
+            <a href="#about">Our story</a>
+          </Button>
         </div>
-        <div className="absolute bottom-4 left-4 bg-background border border-border px-3.5 py-2.5 rounded shadow-sm">
-          <div className="font-display text-xl font-semibold text-foreground">₹1.25 Cr</div>
-          <div className="text-[11px] text-muted-foreground mt-0.5">4 BHK · 2,800 sqft</div>
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          {trustStats.map((stat) => (
+            <div key={stat.label} className="rounded-[24px] border border-border bg-surface p-5 shadow-panel">
+              <div className="font-display text-[2rem] leading-none text-primary">{stat.value}</div>
+              <div className="mt-2 text-sm font-medium text-ink-soft">{stat.label}</div>
+            </div>
+          ))}
         </div>
-      </div>
-      <div className="bg-primary/[0.03] flex items-center justify-center relative p-6">
-        <div className="text-center z-10">
-          <div className="font-display text-[13px] text-green-accent/80 tracking-[2px] uppercase mb-1.5">New Launch</div>
-          <div className="font-display text-[28px] text-foreground font-light">Emerald Heights</div>
-          <div className="text-[11px] text-muted-foreground tracking-wider mt-1">Chandrasekharpur, Odisha</div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.12 }}
+        className="relative"
+      >
+        <div className="pointer-events-none absolute right-2 top-6 h-44 w-44 rounded-full bg-primary/12 blur-3xl" />
+
+        <div className="relative rounded-[32px] border border-border/70 bg-surface p-4 shadow-soft md:p-6">
+          <div className="hero-mesh fine-grid rounded-[28px] border border-primary/10 p-6 md:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="section-label">Featured Collection</span>
+              <p className="text-sm font-semibold text-ink-soft">Cleaner layout, stronger contrast, premium feel.</p>
+            </div>
+
+            <div className="mt-10 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+              <div className="max-w-lg">
+                <p className="text-xs font-bold uppercase tracking-[0.34em] text-primary/70">Patia · Bhubaneswar</p>
+                <h2 className="mt-4 text-[clamp(2.2rem,4vw,3.4rem)] leading-none text-foreground">Skyline Villa</h2>
+                <p className="mt-4 text-base leading-7 text-muted-foreground">
+                  A bright four-bedroom villa with open living spaces, landscaped frontage, and a smoother buyer experience from shortlist to site visit.
+                </p>
+              </div>
+
+              <div className="grid gap-4">
+                <div className="rounded-[24px] bg-primary-deep p-5 text-primary-foreground shadow-panel">
+                  <div className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground/70">Featured home</div>
+                  <div className="mt-4 font-display text-[2.2rem] leading-none">₹1.25 Cr</div>
+                  <div className="mt-2 text-sm text-primary-foreground/78">4 BHK · curated interiors · immediate visits</div>
+                </div>
+
+                <div className="rounded-[24px] border border-border bg-surface p-5 shadow-panel">
+                  <div className="text-xs font-semibold uppercase tracking-[0.24em] text-success">New launch</div>
+                  <div className="mt-4 font-display text-[2rem] leading-none text-foreground">Emerald Heights</div>
+                  <div className="mt-2 text-sm text-muted-foreground">2 BHK residences with compact, modern layouts and clear pricing guidance.</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {quickFacts.map((fact) => (
+                <div key={fact.title} className="rounded-2xl border border-border/80 bg-background/70 p-4 backdrop-blur-sm">
+                  <div className="text-lg font-semibold text-foreground">{fact.title}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{fact.subtitle}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="absolute bottom-4 left-4 bg-background border border-border px-3.5 py-2.5 rounded shadow-sm">
-          <div className="font-display text-xl font-semibold text-foreground">₹85 L</div>
-          <div className="text-[11px] text-muted-foreground mt-0.5">2 BHK · 1,100 sqft</div>
-        </div>
-      </div>
+      </motion.div>
     </div>
   </section>
 );

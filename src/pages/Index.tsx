@@ -7,13 +7,15 @@ import CTAStrip from "@/components/CTAStrip";
 import Footer from "@/components/Footer";
 
 const Index = () => (
-  <div className="min-h-screen bg-background">
+  <div className="page-shell min-h-screen bg-background">
     <Navbar />
-    <HeroSection />
-    <StatsBar />
-    <ListingsSection />
-    <FeaturesSection />
-    <CTAStrip />
+    <main>
+      <HeroSection />
+      <StatsBar />
+      <ListingsSection />
+      <FeaturesSection />
+      <CTAStrip />
+    </main>
     <Footer />
   </div>
 );
