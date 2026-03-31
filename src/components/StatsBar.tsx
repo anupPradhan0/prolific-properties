@@ -8,7 +8,7 @@ const stats = [
 ];
 
 const StatsBar = () => (
-  <div className="grid grid-cols-2 md:grid-cols-4 border-b border-border">
+  <div className="grid grid-cols-2 md:grid-cols-4 border-y border-border bg-card">
     {stats.map((s, i) => (
       <motion.div
         key={i}
@@ -18,8 +18,8 @@ const StatsBar = () => (
         transition={{ delay: i * 0.1, duration: 0.5 }}
         className="px-8 py-6 border-r border-border last:border-r-0"
       >
-        <div className="font-display text-[32px] font-semibold text-gold">{s.num}</div>
-        <div className="text-[11px] text-foreground/40 tracking-widest uppercase mt-1">{s.label}</div>
+        <div className="font-display text-[32px] font-semibold text-primary">{s.num}</div>
+        <div className="text-[11px] text-muted-foreground tracking-widest uppercase mt-1">{s.label}</div>
       </motion.div>
     ))}
   </div>
