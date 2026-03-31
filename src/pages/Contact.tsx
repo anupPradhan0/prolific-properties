@@ -70,21 +70,22 @@ const Contact = () => {
               Share your preferences and our advisors will guide you with suitable listings, budget-fit options, and site visit support across Bhubaneswar.
             </p>
 
+            <h2 className="mt-8 text-3xl leading-tight text-foreground">Contact Details</h2>
             <div className="mt-8 space-y-4 rounded-[24px] border border-border bg-gradient-panel p-6 shadow-panel">
               <div className="rounded-2xl border border-primary/10 bg-surface px-4 py-3">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Call</p>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Call</h3>
                 <a href="tel:+919999999999" className="mt-1 block text-base font-semibold text-foreground hover:text-primary">
                   +91 99999 99999
                 </a>
               </div>
               <div className="rounded-2xl border border-primary/10 bg-surface px-4 py-3">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Email</p>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Email</h3>
                 <a href="mailto:support@prolificproperties.in" className="mt-1 block text-base font-semibold text-foreground hover:text-primary">
                   support@prolificproperties.in
                 </a>
               </div>
               <div className="rounded-2xl border border-primary/10 bg-surface px-4 py-3">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Office</p>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Office</h3>
                 <p className="mt-1 text-sm text-muted-foreground">Bhubaneswar, Odisha, India</p>
               </div>
             </div>
@@ -93,6 +94,7 @@ const Contact = () => {
           <section className="rounded-[28px] bg-gradient-brand p-[1px] shadow-soft">
             <div className="rounded-[27px] bg-surface p-6 md:p-8">
               <h2 className="text-3xl leading-tight text-foreground">Tell us what you need</h2>
+              <h3 className="mt-1 text-base font-semibold text-ink-soft">Enquiry Form</h3>
               <p className="mt-2 text-sm text-muted-foreground">Fields marked with * are required.</p>
 
               {submitted && (
