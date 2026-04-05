@@ -1,6 +1,8 @@
+"use client";
+
 import { FormEvent, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,7 +62,7 @@ const formatSaleBudget = (valueInLakhs: number) => {
 const formatRentBudget = (valueInThousands: number) => `₹${valueInThousands}K`;
 
 const FeaturesSection = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
 
   const initialIntent = tabs.find((tab) => tab.value === searchParams.get("intent"))?.value ?? "buy";
   const initialTabIndex = tabs.findIndex((tab) => tab.value === initialIntent);
@@ -104,14 +106,6 @@ const FeaturesSection = () => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    setSearchParams({
-      intent,
-      q: locationQuery.trim(),
-      min: String(minBudget),
-      max: String(maxBudget),
-      type: propertyTypes[activeType].value,
-    });
 
     document.getElementById("listings")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -201,7 +195,7 @@ const FeaturesSection = () => {
                     setMinBudget(nextMin);
                     setMaxBudget(nextMax);
                   }}
-                  aria-label={["Minimum budget", "Maximum budget"]}
+                  aria-label="Budget range"
                 />
               </div>
 

@@ -1,53 +1,15 @@
-import { FormEvent, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+"use client";
 
+import { FormEvent, useState } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import CTAStrip from "@/components/CTAStrip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const upsertMeta = (selector: string, attr: "name" | "property", key: string, content: string) => {
-  let tag = document.head.querySelector<HTMLMetaElement>(selector);
-
-  if (!tag) {
-    tag = document.createElement("meta");
-    tag.setAttribute(attr, key);
-    document.head.appendChild(tag);
-  }
-
-  tag.setAttribute("content", content);
-};
-
-const upsertCanonical = (href: string) => {
-  let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-
-  if (!link) {
-    link = document.createElement("link");
-    link.setAttribute("rel", "canonical");
-    document.head.appendChild(link);
-  }
-
-  link.setAttribute("href", href);
-};
-
-const Contact = () => {
+export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
-
-  useEffect(() => {
-    const title = "Contact Prolific Properties | Property Consultation";
-    const description =
-      "Contact Prolific Properties for buying, renting, or commercial property support in Bhubaneswar. Share your requirements and our advisors will reach out.";
-    const canonicalUrl = `${window.location.origin}/contact`;
-
-    document.title = title;
-    upsertMeta('meta[name="description"]', "name", "description", description);
-    upsertMeta('meta[name="robots"]', "name", "robots", "index,follow");
-    upsertMeta('meta[property="og:title"]', "property", "og:title", title);
-    upsertMeta('meta[property="og:description"]', "property", "og:description", description);
-    upsertMeta('meta[property="og:url"]', "property", "og:url", canonicalUrl);
-    upsertMeta('meta[name="twitter:title"]', "name", "twitter:title", title);
-    upsertMeta('meta[name="twitter:description"]', "name", "twitter:description", description);
-    upsertCanonical(canonicalUrl);
-  }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,13 +18,11 @@ const Contact = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background py-12">
+    <div className="page-shell min-h-screen bg-background">
+      <Navbar />
+      <main className="py-12">
       <div className="container max-w-5xl">
-        <Link to="/" className="inline-flex rounded-full border border-primary/20 bg-surface px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary-soft">
-          Back to Home
-        </Link>
-
-        <div className="mt-6 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+        <div className="mt-4 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <section>
             <span className="section-label">Contact Support</span>
             <h1 className="text-[clamp(2.2rem,5vw,4rem)] leading-tight text-foreground">Contact Our Property Team</h1>
@@ -191,8 +151,9 @@ const Contact = () => {
           </section>
         </div>
       </div>
+      <CTAStrip />
     </main>
+    <Footer />
+    </div>
   );
-};
-
-export default Contact;
+}

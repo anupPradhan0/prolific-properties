@@ -1,6 +1,8 @@
+"use client";
+
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
@@ -50,7 +52,7 @@ const listings = [
 ];
 
 const ListingsSection = () => {
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
 
   const intentFilter = searchParams.get("intent") ?? "buy";
   const typeFilter = searchParams.get("type") ?? "";

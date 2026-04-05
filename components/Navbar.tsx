@@ -1,14 +1,17 @@
+"use client";
+
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 
 const links = [
-  { label: "Buy", href: "#listings" },
-  { label: "Rent", href: "#search" },
-  { label: "Sell", href: "#about" },
-  { label: "Projects", href: "#listings" },
-  { label: "About", href: "#about" },
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Buy", href: "/buy" },
+  { label: "Blogs", href: "/blogs" },
+  { label: "Contact Us", href: "/contact-us" },
 ];
 
 const Navbar = () => (
@@ -19,8 +22,8 @@ const Navbar = () => (
       transition={{ duration: 0.5 }}
       className="container flex h-20 items-center justify-between gap-4"
     >
-      <a href="#top" className="flex items-center">
-        <img src={logo} alt="Prolific Properties logo" className="h-10 w-auto" />
+      <a href="/" className="flex items-center">
+        <Image src={logo} alt="Prolific Properties logo" width={40} height={40} className="h-10 w-auto" />
       </a>
 
       <div className="hidden lg:flex items-center gap-8 text-sm font-semibold text-muted-foreground">

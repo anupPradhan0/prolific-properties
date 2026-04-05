@@ -1,18 +1,22 @@
+"use client";
+
+import Image from "next/image";
 import logo from "@/assets/logo.png";
 
 const footerLinks = [
-  { label: "Listings", href: "#listings" },
-  { label: "Search", href: "#search" },
-  { label: "About", href: "#about" },
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Buy", href: "/buy" },
+  { label: "Blogs", href: "/blogs" },
   { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact Us", href: "/contact-us" },
 ];
 
 const Footer = () => (
   <footer className="border-t border-border/70 py-8">
     <div className="container flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-4">
-        <img src={logo} alt="Prolific Properties logo" className="h-10 w-auto" />
+        <Image src={logo} alt="Prolific Properties logo" width={40} height={40} className="h-10 w-auto" />
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">
           Modern property advisory for premium homes, rentals, and new launches across Bhubaneswar and beyond.
         </p>
