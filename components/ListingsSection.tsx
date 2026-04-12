@@ -22,6 +22,20 @@ const listings = [
     details: ["4 BHK", "2,800 sqft", "3 Bath"],
   },
   {
+    intent: "buy",
+    type: "apartment",
+    saleBudgetLakh: 85,
+    status: "For Sale",
+    badgeTone: "border-primary/15 bg-surface text-primary",
+    visualTone: "bg-surface-tint",
+    category: "Apartment",
+    title: "Park View Residency",
+    location: "Kharavela Nagar, Bhubaneswar",
+    price: "₹85 L",
+    description: "Modern 3BHK apartment with park view, modular kitchen, and premium amenities.",
+    details: ["3 BHK", "1,800 sqft", "2 Bath"],
+  },
+  {
     intent: "rent",
     type: "apartment",
     rentBudgetK: 35,
@@ -34,6 +48,20 @@ const listings = [
     price: "₹35,000/mo",
     description: "A polished rental option with balanced room sizes, reliable maintenance support, and central access.",
     details: ["3 BHK", "1,600 sqft", "2 Bath"],
+  },
+  {
+    intent: "buy",
+    type: "plot",
+    saleBudgetLakh: 45,
+    status: "For Sale",
+    badgeTone: "border-primary/15 bg-surface text-primary",
+    visualTone: "bg-surface-tint",
+    category: "Plot",
+    title: "Green Valley Plots",
+    location: "Jharpada, Bhubaneswar",
+    price: "₹45 L",
+    description: "RCC road facing plots in a developed locality with clear legal documentation.",
+    details: ["1,200 sqft", "East facing", "Corner plot"],
   },
   {
     intent: "commercial",
@@ -49,12 +77,26 @@ const listings = [
     description: "Premium office inventory with wider frontage, modern utility planning, and launch-stage commercial pricing support.",
     details: ["3,200 sqft", "Corner block", "High footfall"],
   },
+  {
+    intent: "rent",
+    type: "commercial",
+    rentBudgetK: 150,
+    status: "For Rent",
+    badgeTone: "border-primary/12 bg-primary-soft text-primary-deep",
+    visualTone: "bg-surface-strong",
+    category: "Commercial",
+    title: "Tech Hub Office Space",
+    location: "Infopark, Bhubaneswar",
+    price: "₹1.5 L/mo",
+    description: "Fully furnished office space in IT hub with 24/7 power backup and security.",
+    details: ["2,000 sqft", "Furnished", "Parking"],
+  },
 ];
 
 const ListingsSection = () => {
   const searchParams = useSearchParams();
 
-  const intentFilter = searchParams.get("intent") ?? "buy";
+  const intentFilter = searchParams.get("intent") ?? "";
   const typeFilter = searchParams.get("type") ?? "";
   const queryFilter = searchParams.get("q")?.trim().toLowerCase() ?? "";
   const minBudget = Number(searchParams.get("min"));

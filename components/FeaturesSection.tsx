@@ -28,6 +28,7 @@ const reasons = [
 ];
 
 const tabs = [
+  { label: "All", value: "" },
   { label: "Buy", value: "buy" },
   { label: "Rent", value: "rent" },
   { label: "Commercial", value: "commercial" },
@@ -97,11 +98,14 @@ const FeaturesSection = () => {
 
   const handleTabChange = (nextTabIndex: number) => {
     const nextIntent = tabs[nextTabIndex].value;
-    const nextBudget = budgetConfig[nextIntent];
 
     setActiveTab(nextTabIndex);
-    setMinBudget(nextBudget.defaultMin);
-    setMaxBudget(nextBudget.defaultMax);
+
+    if (nextIntent && budgetConfig[nextIntent]) {
+      const nextBudget = budgetConfig[nextIntent];
+      setMinBudget(nextBudget.defaultMin);
+      setMaxBudget(nextBudget.defaultMax);
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {

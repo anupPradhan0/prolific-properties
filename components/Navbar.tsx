@@ -12,6 +12,7 @@ const links = [
   { label: "Buy", href: "/buy" },
   { label: "Blogs", href: "/blogs" },
   { label: "Contact Us", href: "/contact-us" },
+  { label: "Admin", href: "/admin/login" },
 ];
 
 const Navbar = () => (
