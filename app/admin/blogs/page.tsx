@@ -17,7 +17,8 @@ interface Blog {
   category: string;
   status: string;
   author: string;
-  read_time: string;
+  readTime: string;
+  featuredImage: string | null;
 }
 
 export default function AdminBlogs() {
@@ -34,7 +35,8 @@ export default function AdminBlogs() {
     category: "General",
     status: "draft",
     author: "Prolific Properties",
-    read_time: "5 min read",
+    readTime: "5 min read",
+    featuredImage: "",
   });
 
   useEffect(() => {
@@ -78,7 +80,8 @@ export default function AdminBlogs() {
       category: "General",
       status: "draft",
       author: "Prolific Properties",
-      read_time: "5 min read",
+      readTime: "5 min read",
+      featuredImage: "",
     });
     setShowModal(true);
   };
@@ -93,7 +96,8 @@ export default function AdminBlogs() {
       category: blog.category || "General",
       status: blog.status || "draft",
       author: blog.author || "Prolific Properties",
-      read_time: blog.read_time || "5 min read",
+      readTime: blog.readTime || "5 min read",
+      featuredImage: blog.featuredImage || "",
     });
     setShowModal(true);
   };
@@ -110,8 +114,15 @@ export default function AdminBlogs() {
     const token = localStorage.getItem("adminToken");
     
     const payload = {
-      ...formData,
+      title: formData.title,
       slug: formData.slug || generateSlug(formData.title),
+      excerpt: formData.excerpt,
+      content: formData.content,
+      category: formData.category,
+      status: formData.status,
+      author: formData.author,
+      readTime: formData.readTime,
+      featuredImage: formData.featuredImage || null,
     };
 
     try {
@@ -211,7 +222,7 @@ export default function AdminBlogs() {
                     <td className="px-6 py-4">
                       <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{blog.category}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{blog.read_time}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{blog.readTime}</td>
                     <td className="px-6 py-4">
                       <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
                         blog.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
@@ -310,8 +321,8 @@ export default function AdminBlogs() {
                 <div>
                   <label className="mb-2 block text-sm font-semibold">Read Time</label>
                   <Input
-                    value={formData.read_time}
-                    onChange={(e) => setFormData({ ...formData, read_time: e.target.value })}
+                    value={formData.readTime}
+                    onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
                     placeholder="e.g. 5 min read"
                   />
                 </div>
@@ -323,6 +334,15 @@ export default function AdminBlogs() {
                   value={formData.author}
                   onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                   placeholder="Author name"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold">Featured Image URL</label>
+                <Input
+                  value={formData.featuredImage}
+                  onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
                 />
               </div>
 

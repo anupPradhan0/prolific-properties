@@ -45,18 +45,25 @@ export async function PUT(
       location, area, bedrooms, bathrooms, status, featured, imageUrl, metaTitle, metaDescription
     } = body;
 
+    const parsedPrice = price !== undefined 
+      ? (typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, '')) : Number(price))
+      : undefined;
+    const parsedArea = area !== undefined
+      ? (typeof area === 'string' ? parseInt(area.replace(/[^0-9]/g, '')) : Number(area))
+      : undefined;
+
     const listing = await prisma.listing.update({
       where: { slug },
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
-        ...(price !== undefined && { price }),
+        ...(price !== undefined && { price: parsedPrice }),
         ...(priceType !== undefined && { priceType }),
         ...(propertyType !== undefined && { propertyType }),
         ...(location !== undefined && { location }),
-        ...(area !== undefined && { area }),
-        ...(bedrooms !== undefined && { bedrooms }),
-        ...(bathrooms !== undefined && { bathrooms }),
+        ...(area !== undefined && { area: parsedArea }),
+        ...(bedrooms !== undefined && { bedrooms: bedrooms ? Number(bedrooms) : null }),
+        ...(bathrooms !== undefined && { bathrooms: bathrooms ? Number(bathrooms) : null }),
         ...(status !== undefined && { status }),
         ...(featured !== undefined && { featured }),
         ...(imageUrl !== undefined && { imageUrl }),

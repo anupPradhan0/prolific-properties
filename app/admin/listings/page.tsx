@@ -13,16 +13,16 @@ interface Listing {
   title: string;
   slug: string;
   description: string;
-  price: string;
-  price_type: string;
-  property_type: string;
+  price: number;
+  priceType: string;
+  propertyType: string;
   location: string;
-  area: string;
+  area: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   status: string;
   featured: boolean;
-  image_url: string;
+  imageUrl: string | null;
 }
 
 export default function AdminListings() {
@@ -36,15 +36,15 @@ export default function AdminListings() {
     slug: "",
     description: "",
     price: "",
-    price_type: "sale",
-    property_type: "apartment",
+    priceType: "sale",
+    propertyType: "apartment",
     location: "",
     area: "",
     bedrooms: "",
     bathrooms: "",
     status: "active",
     featured: false,
-    image_url: "",
+    imageUrl: "",
   });
 
   useEffect(() => {
@@ -85,15 +85,15 @@ export default function AdminListings() {
       slug: "",
       description: "",
       price: "",
-      price_type: "sale",
-      property_type: "apartment",
+      priceType: "sale",
+      propertyType: "apartment",
       location: "",
       area: "",
       bedrooms: "",
       bathrooms: "",
       status: "active",
       featured: false,
-      image_url: "",
+      imageUrl: "",
     });
     setShowModal(true);
   };
@@ -104,16 +104,16 @@ export default function AdminListings() {
       title: listing.title,
       slug: listing.slug,
       description: listing.description || "",
-      price: listing.price || "",
-      price_type: listing.price_type || "sale",
-      property_type: listing.property_type || "apartment",
+      price: listing.price?.toString() || "",
+      priceType: listing.priceType || "sale",
+      propertyType: listing.propertyType || "apartment",
       location: listing.location || "",
-      area: listing.area || "",
+      area: listing.area?.toString() || "",
       bedrooms: listing.bedrooms?.toString() || "",
       bathrooms: listing.bathrooms?.toString() || "",
       status: listing.status || "active",
       featured: listing.featured || false,
-      image_url: listing.image_url || "",
+      imageUrl: listing.imageUrl || "",
     });
     setShowModal(true);
   };
@@ -130,10 +130,19 @@ export default function AdminListings() {
     const token = localStorage.getItem("adminToken");
     
     const payload = {
-      ...formData,
+      title: formData.title,
+      slug: formData.slug || generateSlug(formData.title),
+      description: formData.description,
+      price: formData.price,
+      priceType: formData.priceType,
+      propertyType: formData.propertyType,
+      location: formData.location,
+      area: formData.area,
       bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
       bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : null,
-      slug: formData.slug || generateSlug(formData.title),
+      status: formData.status,
+      featured: formData.featured,
+      imageUrl: formData.imageUrl || null,
     };
 
     try {
@@ -232,7 +241,7 @@ export default function AdminListings() {
                 {listings.map((listing) => (
                   <tr key={listing.id} className="border-t border-border">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">{listing.title}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground capitalize">{listing.property_type}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground capitalize">{listing.propertyType}</td>
                     <td className="px-6 py-4 text-sm text-foreground">{listing.price}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{listing.location}</td>
                     <td className="px-6 py-4">
@@ -299,8 +308,8 @@ export default function AdminListings() {
               <div>
                 <label className="mb-2 block text-sm font-semibold">Image URL</label>
                 <Input
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  value={formData.imageUrl}
+                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                   placeholder="https://example.com/image.jpg"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">Enter the URL of the property image</p>
@@ -319,8 +328,8 @@ export default function AdminListings() {
                 <div>
                   <label className="mb-2 block text-sm font-semibold">Price Type</label>
                   <select
-                    value={formData.price_type}
-                    onChange={(e) => setFormData({ ...formData, price_type: e.target.value })}
+                    value={formData.priceType}
+                    onChange={(e) => setFormData({ ...formData, priceType: e.target.value })}
                     className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
                   >
                     <option value="sale">For Sale</option>
@@ -330,8 +339,8 @@ export default function AdminListings() {
                 <div>
                   <label className="mb-2 block text-sm font-semibold">Property Type</label>
                   <select
-                    value={formData.property_type}
-                    onChange={(e) => setFormData({ ...formData, property_type: e.target.value })}
+                    value={formData.propertyType}
+                    onChange={(e) => setFormData({ ...formData, propertyType: e.target.value })}
                     className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
                   >
                     <option value="apartment">Apartment</option>

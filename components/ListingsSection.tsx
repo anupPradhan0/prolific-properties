@@ -11,16 +11,16 @@ interface Listing {
   title: string;
   slug: string;
   description: string;
-  price: string;
-  price_type: string;
-  property_type: string;
+  price: number;
+  priceType: string;
+  propertyType: string;
   location: string;
-  area: string;
+  area: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   status: string;
   featured: boolean;
-  image_url: string;
+  imageUrl: string | null;
 }
 
 const ListingsSection = () => {
@@ -50,13 +50,13 @@ const ListingsSection = () => {
 
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
-      const matchesIntent = !intentFilter || listing.price_type === intentFilter;
-      const matchesType = !typeFilter || listing.property_type === typeFilter;
+      const matchesIntent = !intentFilter || listing.priceType === intentFilter;
+      const matchesType = !typeFilter || listing.propertyType === typeFilter;
       const matchesQuery =
         !queryFilter ||
         listing.title.toLowerCase().includes(queryFilter) ||
         listing.location.toLowerCase().includes(queryFilter) ||
-        listing.property_type.toLowerCase().includes(queryFilter);
+        listing.propertyType.toLowerCase().includes(queryFilter);
 
       return matchesIntent && matchesType && matchesQuery;
     });
@@ -66,7 +66,7 @@ const ListingsSection = () => {
     if (listing.featured) {
       return "border-success/20 bg-surface text-success";
     }
-    if (listing.price_type === "rent") {
+    if (listing.priceType === "rent") {
       return "border-primary/12 bg-primary-soft text-primary-deep";
     }
     return "border-primary/15 bg-surface text-primary";
@@ -74,16 +74,16 @@ const ListingsSection = () => {
 
   const getStatusLabel = (listing: Listing) => {
     if (listing.featured) return "Featured";
-    if (listing.price_type === "rent") return "For Rent";
+    if (listing.priceType === "rent") return "For Rent";
     return "For Sale";
   };
 
   const getDetails = (listing: Listing) => {
     const details: string[] = [];
     if (listing.bedrooms) details.push(`${listing.bedrooms} BHK`);
-    if (listing.area) details.push(listing.area);
+    if (listing.area) details.push(`${listing.area} sqft`);
     if (listing.bathrooms) details.push(`${listing.bathrooms} Bath`);
-    if (listing.property_type === "commercial") {
+    if (listing.propertyType === "commercial") {
       details.push("Commercial");
     }
     return details;
@@ -142,9 +142,9 @@ const ListingsSection = () => {
                 className="group overflow-hidden rounded-[28px] border border-border bg-surface shadow-panel transition-transform duration-300 hover:-translate-y-1"
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
-                  {listing.image_url ? (
+                  {listing.imageUrl ? (
                     <img
-                      src={listing.image_url}
+                      src={listing.imageUrl}
                       alt={listing.title}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
@@ -153,7 +153,7 @@ const ListingsSection = () => {
                       }}
                     />
                   ) : null}
-                  <div className={`absolute inset-0 bg-gradient-to-br from-surface-tint to-surface ${listing.image_url ? 'hidden' : ''}`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br from-surface-tint to-surface ${listing.imageUrl ? 'hidden' : ''}`} />
                   <div className="absolute top-4 left-4">
                     <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${getBadgeTone(listing)}`}>
                       {getStatusLabel(listing)}
@@ -162,7 +162,7 @@ const ListingsSection = () => {
                 </div>
                 
                 <div className="p-6">
-                  <p className="text-xs font-bold uppercase tracking-[0.32em] text-primary/70">{listing.property_type}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.32em] text-primary/70">{listing.propertyType}</p>
                   <h3 className="mt-2 text-2xl leading-tight text-foreground">{listing.title}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{listing.location}</p>
 

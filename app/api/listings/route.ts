@@ -68,18 +68,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const parsedPrice = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, '')) : Number(price);
+    const parsedArea = area ? (typeof area === 'string' ? parseInt(area.replace(/[^0-9]/g, '')) : Number(area)) : null;
+
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      return NextResponse.json(
+        { error: "Price must be a valid number" },
+        { status: 400 }
+      );
+    }
+
     const listing = await prisma.listing.create({
       data: {
         title,
         slug,
         description,
-        price,
+        price: parsedPrice,
         priceType: priceType || "sale",
         propertyType: propertyType || "apartment",
         location,
-        area,
-        bedrooms,
-        bathrooms,
+        area: parsedArea,
+        bedrooms: bedrooms ? Number(bedrooms) : null,
+        bathrooms: bathrooms ? Number(bathrooms) : null,
         featured: featured || false,
         imageUrl,
         metaTitle,
