@@ -18,12 +18,28 @@ export default function AdminLogin() {
     setError("");
     setLoading(true);
 
-    if (email === "admin@prolificproperties.in" && password === "admin123") {
-      localStorage.setItem("adminLoggedIn", "true");
-      router.push("/admin/dashboard");
-    } else {
-      setError("Invalid email or password");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("adminEmail", data.user.email);
+        router.push("/admin/dashboard");
+      } else {
+        setError(data.error || "Login failed");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
     }
+
     setLoading(false);
   };
 
@@ -82,10 +98,6 @@ export default function AdminLogin() {
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-
-            <p className="mt-6 text-center text-xs text-muted-foreground">
-              Demo credentials: admin@prolificproperties.in / admin123
-            </p>
           </div>
         </div>
       </div>
