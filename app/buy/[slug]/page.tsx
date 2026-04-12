@@ -44,11 +44,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: listing.meta_title || `${listing.title} | ${listing.location} | Prolific Properties`,
-    description: listing.meta_description || `${listing.title} - ${listing.bedrooms ? listing.bedrooms + " BHK" : ""} ${listing.property_type} in ${listing.location}. ${listing.price}. Book a site visit today.`,
+    title: listing.metaTitle || `${listing.title} | ${listing.location} | Prolific Properties`,
+    description: listing.metaDescription || `${listing.title} - ${listing.bedrooms ? listing.bedrooms + " BHK" : ""} ${listing.propertyType} in ${listing.location}. ${listing.price}. Book a site visit today.`,
     openGraph: {
-      title: listing.meta_title || listing.title,
-      description: listing.meta_description || listing.description,
+      title: listing.metaTitle || listing.title,
+      description: listing.metaDescription || listing.description,
       type: "website",
     },
   };
@@ -87,14 +87,14 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
     url: `https://www.prolificproperties.in/buy/${listing.slug}`,
     offers: {
       "@type": "Offer",
-      price: listing.price.replace(/[^0-9.]/g, ""),
+      price: listing.price?.toString() || "0",
       priceCurrency: "INR",
       availability: "https://schema.org/InStock",
     },
     numberOfRooms: listing.bedrooms?.toString(),
     floorSize: {
       "@type": "QuantitativeValue",
-      value: listing.area?.replace(/[^0-9]/g, ""),
+      value: listing.area?.toString() || "0",
       unitCode: "FTK",
     },
     address: {
@@ -122,9 +122,9 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
 
             <div className="mt-8 grid gap-12 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                {listing.image_url ? (
+                {listing.imageUrl ? (
                   <img
-                    src={listing.image_url}
+                    src={listing.imageUrl}
                     alt={listing.title}
                     className="aspect-[16/9] w-full rounded-[28px] object-cover"
                   />
@@ -134,11 +134,11 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
                 
                 <div className="mt-8">
                   <span className={`inline-flex rounded-full border px-4 py-1 text-sm font-semibold ${
-                    listing.price_type === "rent" 
+                    listing.priceType === "rent" 
                       ? "border-primary/12 bg-primary-soft text-primary-deep" 
                       : "border-primary/15 bg-surface text-primary"
                   }`}>
-                    {listing.price_type === "rent" ? "For Rent" : "For Sale"}
+                    {listing.priceType === "rent" ? "For Rent" : "For Sale"}
                   </span>
                   
                   <h1 className="mt-4 text-[clamp(2.5rem,5vw,4rem)] leading-tight text-foreground">
@@ -153,10 +153,14 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
                         {listing.bedrooms} BHK
                       </span>
                     )}
-                    {listing.area && (
+{listing.area && (
                       <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold">
-                        {listing.area}
+                        {listing.area} sqft
                       </span>
+                    )}
+                    <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold capitalize">
+                      {listing.propertyType}
+                    </span>
                     )}
                     {listing.bathrooms && (
                       <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold">
@@ -179,8 +183,8 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
 
               <div>
                 <div className="sticky top-24 rounded-[28px] border border-border bg-surface p-8 shadow-panel">
-                  <p className="font-display text-5xl text-foreground">{listing.price}</p>
-                  {listing.price_type === "rent" && (
+                  <p className="font-display text-5xl text-foreground">₹{listing.price?.toLocaleString()}</p>
+                  {listing.priceType === "rent" && (
                     <p className="text-sm text-muted-foreground">per month</p>
                   )}
 
@@ -189,11 +193,11 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Property Type</span>
-                        <span className="font-semibold capitalize">{listing.property_type}</span>
+                        <span className="font-semibold capitalize">{listing.propertyType}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Status</span>
-                        <span className="font-semibold capitalize">{listing.price_type}</span>
+                        <span className="font-semibold capitalize">{listing.priceType}</span>
                       </div>
                       {listing.bedrooms && (
                         <div className="flex justify-between">
@@ -210,7 +214,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
                       {listing.area && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Area</span>
-                          <span className="font-semibold">{listing.area}</span>
+                          <span className="font-semibold">{listing.area} sqft</span>
                         </div>
                       )}
                       <div className="flex justify-between">
