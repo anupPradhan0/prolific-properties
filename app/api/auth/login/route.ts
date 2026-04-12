@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { generateToken, comparePassword } from "@/lib/auth";
 
-// Demo mode - works without database
 const DEMO_USERS = [
   { id: 1, email: "abhilash.panda8383@gmail.com", password: "abhilash8383" }
 ];
@@ -17,27 +17,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try database first, fallback to demo mode
     let user = null;
-    
-    try {
-      const { query } = await import("@/lib/db");
-      const { comparePassword } = await import("@/lib/auth");
-      
-      const result = await query(
-        "SELECT id, email, password FROM users WHERE email = $1",
-        [email]
-      );
 
-      if (result.rows.length > 0) {
-        const dbUser = result.rows[0];
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (dbUser) {
         const isValidPassword = await comparePassword(password, dbUser.password);
         if (isValidPassword) {
           user = dbUser;
         }
       }
     } catch (dbError) {
-      // Database not available, use demo mode
       console.log("Database not available, using demo mode");
       user = DEMO_USERS.find(u => u.email === email && u.password === password);
     }

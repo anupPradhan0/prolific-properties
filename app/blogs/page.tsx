@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,65 +10,39 @@ export const metadata: Metadata = {
   description: "Read the latest insights on real estate in Bhubaneswar - property tips, market trends, and buying guides from Prolific Properties.",
 };
 
-const blogPosts = [
-  {
-    slug: "first-home-guide-2026",
-    title: "A Complete Guide to Buying Your First Home in Bhubaneswar",
-    excerpt: "From budget planning to site visits - everything first-time buyers need to know about purchasing property in Bhubaneswar.",
-    category: "Buying Guide",
-    date: "March 15, 2026",
-    readTime: "8 min read",
-  },
-  {
-    slug: "bhubaneswar-neighborhoods",
-    title: "Top 5 Neighborhoods in Bhubaneswar for Home Buyers",
-    excerpt: "Exploring the best localities - from Patia to Chandrasekharpur - and what makes each area unique for different buyer needs.",
-    category: "Market Insights",
-    date: "March 8, 2026",
-    readTime: "6 min read",
-  },
-  {
-    slug: "villa-vs-apartment",
-    title: "Villa or Apartment: Which is Right for You?",
-    excerpt: "A detailed comparison of villas and apartments in Bhubaneswar covering lifestyle, investment potential, and maintenance aspects.",
-    category: "Buying Guide",
-    date: "February 28, 2026",
-    readTime: "5 min read",
-  },
-  {
-    slug: "commercial-real-estate-trends",
-    title: "Commercial Real Estate Trends in Bhubaneswar 2026",
-    excerpt: "Analyzing the growth of commercial spaces, office demand, and retail opportunities in the Odisha capital.",
-    category: "Market Insights",
-    date: "February 20, 2026",
-    readTime: "7 min read",
-  },
-  {
-    slug: "property-documents-checklist",
-    title: "Essential Documents Checklist for Property Purchase",
-    excerpt: "Don't get caught without these documents. A comprehensive checklist for hassle-free property transactions in Odisha.",
-    category: "Legal Guide",
-    date: "February 12, 2026",
-    readTime: "4 min read",
-  },
-  {
-    slug: "renting-in-bhubaneswar",
-    title: "The Complete Renter's Guide to Bhubaneswar",
-    excerpt: "From rental agreements to deposits - everything tenants need to know about renting in Bhubaneswar.",
-    category: "Renting Guide",
-    date: "February 5, 2026",
-    readTime: "6 min read",
-  },
+const categories = [
+  { label: "All", value: "" },
+  { label: "Buying Guide", value: "Buying Guide" },
+  { label: "Market Insights", value: "Market Insights" },
+  { label: "Legal Guide", value: "Legal Guide" },
+  { label: "Renting Guide", value: "Renting Guide" },
 ];
 
-export default function Blogs() {
+async function getBlogs(category?: string) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/blogs?status=published${category ? `&category=${category}` : ""}`, {
+      next: { revalidate: 60 },
+    });
+    const data = await res.json();
+    return data.success ? data.blogs : [];
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    return [];
+  }
+}
+
+export default async function Blogs({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const params = await searchParams;
+  const blogs = await getBlogs(params.category);
+
   return (
     <div className="page-shell min-h-screen bg-background">
       <Navbar />
       <main>
         <section className="py-12 md:py-16">
           <div className="container">
-            <div className="mt-4">
+            <div>
               <span className="section-label">Our Blog</span>
               <h1 className="mt-4 text-[clamp(2.2rem,5vw,4rem)] leading-tight text-foreground">
                 Insights & Guides
@@ -77,32 +52,55 @@ export default function Blogs() {
               </p>
             </div>
 
-            <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {blogPosts.map((post) => (
-                <article
-                  key={post.slug}
-                  className="group overflow-hidden rounded-[28px] border border-border bg-surface shadow-panel transition-transform duration-300 hover:-translate-y-1"
+            <div className="mt-8 flex flex-wrap gap-3">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.value}
+                  href={cat.value ? `/blogs?category=${cat.value}` : "/blogs"}
+                  className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
+                    params.category === cat.value || (!params.category && cat.value === "")
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border bg-surface text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                  }`}
                 >
-                  <div className="aspect-[4/3] bg-gradient-panel" />
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 text-xs font-semibold">
-                      <span className="rounded-full bg-primary-soft px-3 py-1 text-primary">{post.category}</span>
-                      <span className="text-muted-foreground">{post.readTime}</span>
-                    </div>
-                    <h2 className="mt-4 text-xl leading-tight text-foreground group-hover:text-primary transition-colors">
-                      {post.title}
-                    </h2>
-                    <p className="mt-3 text-sm text-muted-foreground">{post.excerpt}</p>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{post.date}</span>
-                      <Button variant="link" size="sm" className="text-primary">
-                        Read more →
-                      </Button>
-                    </div>
-                  </div>
-                </article>
+                  {cat.label}
+                </Link>
               ))}
             </div>
+
+            {blogs.length === 0 ? (
+              <div className="mt-16 rounded-[28px] border border-border bg-surface p-8 shadow-panel text-center">
+                <h3 className="text-2xl text-foreground">No blog posts found</h3>
+                <p className="mt-2 text-muted-foreground">Check back soon for new articles!</p>
+              </div>
+            ) : (
+              <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {blogs.map((post: any) => (
+                  <article
+                    key={post.id}
+                    className="group overflow-hidden rounded-[28px] border border-border bg-surface shadow-panel transition-transform duration-300 hover:-translate-y-1"
+                  >
+                    <div className="aspect-[4/3] bg-gradient-panel" />
+                    <div className="p-6">
+                      <div className="flex items-center gap-3 text-xs font-semibold">
+                        <span className="rounded-full bg-primary-soft px-3 py-1 text-primary">{post.category}</span>
+                        <span className="text-muted-foreground">{post.read_time}</span>
+                      </div>
+                      <h2 className="mt-4 text-xl leading-tight text-foreground group-hover:text-primary transition-colors">
+                        {post.title}
+                      </h2>
+                      <p className="mt-3 text-sm text-muted-foreground">{post.excerpt}</p>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">{new Date(post.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</span>
+                        <Button asChild variant="link" size="sm" className="text-primary">
+                          <Link href={`/blogs/${post.slug}`}>Read more →</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
 
             <div className="mt-16 text-center">
               <Button size="lg" variant="outline" className="rounded-full">

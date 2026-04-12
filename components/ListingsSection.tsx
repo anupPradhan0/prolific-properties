@@ -1,134 +1,107 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const listings = [
-  {
-    intent: "buy",
-    type: "villa",
-    saleBudgetLakh: 125,
-    status: "For Sale",
-    badgeTone: "border-primary/15 bg-surface text-primary",
-    visualTone: "bg-surface-tint",
-    category: "Villa",
-    title: "Skyline Villa",
-    location: "Patia, Bhubaneswar",
-    price: "₹1.25 Cr",
-    description: "Sunlit bedrooms, premium finishes, and a spacious family layout ready for quick walkthroughs.",
-    details: ["4 BHK", "2,800 sqft", "3 Bath"],
-  },
-  {
-    intent: "buy",
-    type: "apartment",
-    saleBudgetLakh: 85,
-    status: "For Sale",
-    badgeTone: "border-primary/15 bg-surface text-primary",
-    visualTone: "bg-surface-tint",
-    category: "Apartment",
-    title: "Park View Residency",
-    location: "Kharavela Nagar, Bhubaneswar",
-    price: "₹85 L",
-    description: "Modern 3BHK apartment with park view, modular kitchen, and premium amenities.",
-    details: ["3 BHK", "1,800 sqft", "2 Bath"],
-  },
-  {
-    intent: "rent",
-    type: "apartment",
-    rentBudgetK: 35,
-    status: "For Rent",
-    badgeTone: "border-primary/12 bg-primary-soft text-primary-deep",
-    visualTone: "bg-surface-strong",
-    category: "Apartment",
-    title: "Golden Heights",
-    location: "Nayapalli, Bhubaneswar",
-    price: "₹35,000/mo",
-    description: "A polished rental option with balanced room sizes, reliable maintenance support, and central access.",
-    details: ["3 BHK", "1,600 sqft", "2 Bath"],
-  },
-  {
-    intent: "buy",
-    type: "plot",
-    saleBudgetLakh: 45,
-    status: "For Sale",
-    badgeTone: "border-primary/15 bg-surface text-primary",
-    visualTone: "bg-surface-tint",
-    category: "Plot",
-    title: "Green Valley Plots",
-    location: "Jharpada, Bhubaneswar",
-    price: "₹45 L",
-    description: "RCC road facing plots in a developed locality with clear legal documentation.",
-    details: ["1,200 sqft", "East facing", "Corner plot"],
-  },
-  {
-    intent: "commercial",
-    type: "commercial",
-    saleBudgetLakh: 210,
-    status: "New Launch",
-    badgeTone: "border-success/20 bg-surface text-success",
-    visualTone: "bg-primary-soft",
-    category: "Commercial",
-    title: "Emerald Heights Business",
-    location: "CSPUR, Bhubaneswar",
-    price: "₹2.10 Cr",
-    description: "Premium office inventory with wider frontage, modern utility planning, and launch-stage commercial pricing support.",
-    details: ["3,200 sqft", "Corner block", "High footfall"],
-  },
-  {
-    intent: "rent",
-    type: "commercial",
-    rentBudgetK: 150,
-    status: "For Rent",
-    badgeTone: "border-primary/12 bg-primary-soft text-primary-deep",
-    visualTone: "bg-surface-strong",
-    category: "Commercial",
-    title: "Tech Hub Office Space",
-    location: "Infopark, Bhubaneswar",
-    price: "₹1.5 L/mo",
-    description: "Fully furnished office space in IT hub with 24/7 power backup and security.",
-    details: ["2,000 sqft", "Furnished", "Parking"],
-  },
-];
+interface Listing {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  price: string;
+  price_type: string;
+  property_type: string;
+  location: string;
+  area: string;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  status: string;
+  featured: boolean;
+  image_url: string;
+}
 
 const ListingsSection = () => {
   const searchParams = useSearchParams();
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const intentFilter = searchParams.get("intent") ?? "";
   const typeFilter = searchParams.get("type") ?? "";
   const queryFilter = searchParams.get("q")?.trim().toLowerCase() ?? "";
-  const minBudget = Number(searchParams.get("min"));
-  const maxBudget = Number(searchParams.get("max"));
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const res = await fetch("/api/listings?status=active");
+        const data = await res.json();
+        if (data.success) {
+          setListings(data.listings);
+        }
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+      }
+      setLoading(false);
+    };
+    fetchListings();
+  }, []);
 
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
-      const matchesIntent = !intentFilter || listing.intent === intentFilter;
-
-      const matchesType = !typeFilter || listing.type === typeFilter;
-
+      const matchesIntent = !intentFilter || listing.price_type === intentFilter;
+      const matchesType = !typeFilter || listing.property_type === typeFilter;
       const matchesQuery =
         !queryFilter ||
         listing.title.toLowerCase().includes(queryFilter) ||
         listing.location.toLowerCase().includes(queryFilter) ||
-        listing.category.toLowerCase().includes(queryFilter);
+        listing.property_type.toLowerCase().includes(queryFilter);
 
-      let matchesBudget = true;
-      if (Number.isFinite(minBudget) && Number.isFinite(maxBudget)) {
-        if (intentFilter === "rent") {
-          matchesBudget = typeof listing.rentBudgetK === "number" && listing.rentBudgetK >= minBudget && listing.rentBudgetK <= maxBudget;
-        } else {
-          matchesBudget =
-            typeof listing.saleBudgetLakh === "number" &&
-            listing.saleBudgetLakh >= minBudget &&
-            listing.saleBudgetLakh <= maxBudget;
-        }
-      }
-
-      return matchesIntent && matchesType && matchesQuery && matchesBudget;
+      return matchesIntent && matchesType && matchesQuery;
     });
-  }, [intentFilter, maxBudget, minBudget, queryFilter, typeFilter]);
+  }, [listings, intentFilter, typeFilter, queryFilter]);
+
+  const getBadgeTone = (listing: Listing) => {
+    if (listing.featured) {
+      return "border-success/20 bg-surface text-success";
+    }
+    if (listing.price_type === "rent") {
+      return "border-primary/12 bg-primary-soft text-primary-deep";
+    }
+    return "border-primary/15 bg-surface text-primary";
+  };
+
+  const getStatusLabel = (listing: Listing) => {
+    if (listing.featured) return "Featured";
+    if (listing.price_type === "rent") return "For Rent";
+    return "For Sale";
+  };
+
+  const getDetails = (listing: Listing) => {
+    const details: string[] = [];
+    if (listing.bedrooms) details.push(`${listing.bedrooms} BHK`);
+    if (listing.area) details.push(listing.area);
+    if (listing.bathrooms) details.push(`${listing.bathrooms} Bath`);
+    if (listing.property_type === "commercial") {
+      details.push("Commercial");
+    }
+    return details;
+  };
+
+  if (loading) {
+    return (
+      <section id="listings" className="scroll-mt-24 py-20">
+        <div className="container">
+          <div className="grid gap-6 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-96 animate-pulse rounded-[28px] bg-muted" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="listings" className="scroll-mt-24 py-20">
@@ -143,7 +116,7 @@ const ListingsSection = () => {
 
           <p className="max-w-xl text-base leading-7 text-muted-foreground">
             Browse standout sale, rental, and launch-ready properties curated for better visibility, stronger trust, and a cleaner premium experience.
-            <span className="mt-3 block font-semibold text-foreground">Showing {filteredListings.length} of {listings.length} listings</span>
+            <span className="mt-3 block font-semibold text-foreground">Showing {filteredListings.length} listings</span>
           </p>
         </div>
 
@@ -154,35 +127,47 @@ const ListingsSection = () => {
               Try a broader budget range or switch property type to see available homes and commercial options.
             </p>
             <Button asChild size="lg" className="mt-6">
-              <a href="#search">Adjust filters</a>
+              <Link href="#search">Adjust filters</Link>
             </Button>
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
             {filteredListings.map((listing, index) => (
               <motion.article
-                key={listing.title}
+                key={listing.id}
                 initial={{ opacity: 0, y: 22 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.55, delay: index * 0.1 }}
                 className="group overflow-hidden rounded-[28px] border border-border bg-surface shadow-panel transition-transform duration-300 hover:-translate-y-1"
               >
-                <div className={`border-b border-border p-6 ${listing.visualTone}`}>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${listing.badgeTone}`}>
-                      {listing.status}
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  {listing.image_url ? (
+                    <img
+                      src={listing.image_url}
+                      alt={listing.title}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`absolute inset-0 bg-gradient-to-br from-surface-tint to-surface ${listing.image_url ? 'hidden' : ''}`} />
+                  <div className="absolute top-4 left-4">
+                    <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${getBadgeTone(listing)}`}>
+                      {getStatusLabel(listing)}
                     </span>
-                    <span className="text-sm font-medium text-muted-foreground">{listing.location}</span>
                   </div>
+                </div>
+                
+                <div className="p-6">
+                  <p className="text-xs font-bold uppercase tracking-[0.32em] text-primary/70">{listing.property_type}</p>
+                  <h3 className="mt-2 text-2xl leading-tight text-foreground">{listing.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{listing.location}</p>
 
-                  <div className="mt-16">
-                    <p className="text-xs font-bold uppercase tracking-[0.32em] text-primary/70">{listing.category}</p>
-                    <h3 className="mt-3 text-[2.35rem] leading-none text-foreground">{listing.title}</h3>
-                  </div>
-
-                  <div className="mt-8 flex flex-wrap gap-2">
-                    {listing.details.map((detail) => (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {getDetails(listing).map((detail) => (
                       <span key={detail} className="rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-semibold text-ink-soft">
                         {detail}
                       </span>
@@ -196,7 +181,9 @@ const ListingsSection = () => {
                       <p className="font-display text-[2.6rem] leading-none text-foreground">{listing.price}</p>
                       <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">{listing.description}</p>
                     </div>
-                    <Button variant="secondary" size="sm">Details</Button>
+                    <Button asChild variant="secondary" size="sm">
+                      <Link href={`/buy/${listing.slug}`}>Details</Link>
+                    </Button>
                   </div>
                 </div>
               </motion.article>

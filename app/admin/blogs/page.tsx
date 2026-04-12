@@ -5,32 +5,157 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "@/components/admin/Sidebar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-const demoBlogs = [
-  { id: 1, title: "A Complete Guide to Buying Your First Home in Bhubaneswar", category: "Buying Guide", date: "March 15, 2026", status: "Published" },
-  { id: 2, title: "Top 5 Neighborhoods in Bhubaneswar for Home Buyers", category: "Market Insights", date: "March 8, 2026", status: "Published" },
-  { id: 3, title: "Villa or Apartment: Which is Right for You?", category: "Buying Guide", date: "February 28, 2026", status: "Draft" },
-  { id: 4, title: "Commercial Real Estate Trends in Bhubaneswar 2026", category: "Market Insights", date: "February 20, 2026", status: "Published" },
-  { id: 5, title: "Essential Documents Checklist for Property Purchase", category: "Legal Guide", date: "February 12, 2026", status: "Draft" },
-  { id: 6, title: "The Complete Renter's Guide to Bhubaneswar", category: "Renting Guide", date: "February 5, 2026", status: "Published" },
-];
+interface Blog {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  status: string;
+  author: string;
+  read_time: string;
+}
 
 export default function AdminBlogs() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    slug: "",
+    excerpt: "",
+    content: "",
+    category: "General",
+    status: "draft",
+    author: "Prolific Properties",
+    read_time: "5 min read",
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
     if (!token) {
       router.push("/admin/login");
+      return;
+    }
+    fetchBlogs();
+  }, [router]);
+
+  const fetchBlogs = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch("/api/blogs?status=", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBlogs(data.blogs);
+      }
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
     }
     setLoading(false);
-  }, [router]);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminEmail");
     router.push("/admin/login");
+  };
+
+  const openAddModal = () => {
+    setEditingBlog(null);
+    setFormData({
+      title: "",
+      slug: "",
+      excerpt: "",
+      content: "",
+      category: "General",
+      status: "draft",
+      author: "Prolific Properties",
+      read_time: "5 min read",
+    });
+    setShowModal(true);
+  };
+
+  const openEditModal = (blog: Blog) => {
+    setEditingBlog(blog);
+    setFormData({
+      title: blog.title,
+      slug: blog.slug,
+      excerpt: blog.excerpt || "",
+      content: blog.content || "",
+      category: blog.category || "General",
+      status: blog.status || "draft",
+      author: blog.author || "Prolific Properties",
+      read_time: blog.read_time || "5 min read",
+    });
+    setShowModal(true);
+  };
+
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem("adminToken");
+    
+    const payload = {
+      ...formData,
+      slug: formData.slug || generateSlug(formData.title),
+    };
+
+    try {
+      const url = editingBlog 
+        ? `/api/blogs/${editingBlog.slug}` 
+        : "/api/blogs";
+      const method = editingBlog ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setShowModal(false);
+        fetchBlogs();
+      } else {
+        alert("Failed to save blog");
+      }
+    } catch (error) {
+      console.error("Error saving blog:", error);
+      alert("Failed to save blog");
+    }
+  };
+
+  const handleDelete = async (slug: string) => {
+    if (!confirm("Are you sure you want to delete this blog post?")) return;
+    
+    const token = localStorage.getItem("adminToken");
+    try {
+      const res = await fetch(`/api/blogs/${slug}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        fetchBlogs();
+      }
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+    }
   };
 
   if (loading) {
@@ -65,7 +190,7 @@ export default function AdminBlogs() {
               <h1 className="text-3xl font-bold text-foreground">Blog Posts</h1>
               <p className="mt-1 text-muted-foreground">Manage your blog content</p>
             </div>
-            <Button size="lg">+ Add New Post</Button>
+            <Button size="lg" onClick={openAddModal}>+ Add New Post</Button>
           </div>
 
           <div className="mt-8 overflow-hidden rounded-[24px] border border-border bg-surface shadow-panel">
@@ -74,31 +199,29 @@ export default function AdminBlogs() {
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Title</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Category</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Date</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Read Time</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Status</th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {demoBlogs.map((blog) => (
+                {blogs.map((blog) => (
                   <tr key={blog.id} className="border-t border-border">
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">{blog.title}</td>
                     <td className="px-6 py-4">
                       <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{blog.category}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{blog.date}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{blog.read_time}</td>
                     <td className="px-6 py-4">
                       <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        blog.status === "Published" 
-                          ? "bg-success/10 text-success" 
-                          : "bg-muted text-muted-foreground"
+                        blog.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                       }`}>
                         {blog.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Button variant="ghost" size="sm">Edit</Button>
-                      <Button variant="ghost" size="sm" className="text-destructive">Delete</Button>
+                      <Button variant="ghost" size="sm" onClick={() => openEditModal(blog)}>Edit</Button>
+                      <Button variant="ghost" size="sm" className="text-destructive" onClick={() => handleDelete(blog.slug)}>Delete</Button>
                     </td>
                   </tr>
                 ))}
@@ -107,6 +230,114 @@ export default function AdminBlogs() {
           </div>
         </div>
       </main>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-surface p-8 shadow-panel">
+            <h2 className="text-2xl font-bold text-foreground">
+              {editingBlog ? "Edit Blog Post" : "Add New Blog Post"}
+            </h2>
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Title *</label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => {
+                      setFormData({ ...formData, title: e.target.value, slug: generateSlug(e.target.value) });
+                    }}
+                    placeholder="Blog post title"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Slug</label>
+                  <Input
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    placeholder="auto-generated-from-title"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold">Excerpt</label>
+                <Textarea
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                  placeholder="Brief description for listing page..."
+                  rows={2}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold">Content (HTML)</label>
+                <Textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  placeholder="Full blog content (HTML allowed)..."
+                  rows={10}
+                  className="font-mono text-sm"
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
+                  >
+                    <option value="General">General</option>
+                    <option value="Buying Guide">Buying Guide</option>
+                    <option value="Market Insights">Market Insights</option>
+                    <option value="Legal Guide">Legal Guide</option>
+                    <option value="Renting Guide">Renting Guide</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Read Time</label>
+                  <Input
+                    value={formData.read_time}
+                    onChange={(e) => setFormData({ ...formData, read_time: e.target.value })}
+                    placeholder="e.g. 5 min read"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold">Author</label>
+                <Input
+                  value={formData.author}
+                  onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                  placeholder="Author name"
+                />
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowModal(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1">
+                  {editingBlog ? "Update" : "Create"} Post
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
