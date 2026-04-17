@@ -7,6 +7,7 @@ const menuItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: "📊" },
   { label: "Listings", href: "/admin/listings", icon: "🏠" },
   { label: "Blogs", href: "/admin/blogs", icon: "📝" },
+  { label: "Contacts", href: "/admin/contacts", icon: "👥" },
 ];
 
 export default function Sidebar() {

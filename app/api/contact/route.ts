@@ -12,31 +12,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, we'll just log the contact submission
-    // In a real application, you might want to:
-    // 1. Save to database
-    // 2. Send email notification
-    // 3. Integrate with CRM system
-
-    console.log("New contact form submission:", {
-      fullName,
-      phone,
-      email,
-      interest,
-      budget,
-      message,
-      consent,
-      timestamp: new Date().toISOString(),
+    // Save contact to database
+    const contact = await prisma.contact.create({
+      data: {
+        fullName,
+        phone,
+        email,
+        interest,
+        budget,
+        message,
+        status: "active", // Default status
+      },
     });
 
-    // You could save to database here if you add a Contact model to Prisma schema
-    // const contact = await prisma.contact.create({
-    //   data: { fullName, phone, email, interest, budget, message },
-    // });
+    console.log("New contact form submission saved:", contact);
 
     return NextResponse.json({
       success: true,
       message: "Thank you for your enquiry. We'll contact you shortly.",
+      contactId: contact.id,
     });
   } catch (error) {
     console.error("Contact form error:", error);
