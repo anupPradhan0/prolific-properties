@@ -86,11 +86,6 @@ export default async function Blogs({ searchParams }: { searchParams: Promise<{ 
                           src={post.featuredImage}
                           alt={post.title}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            target.parentElement!.innerHTML = '<div class="h-full w-full bg-gradient-panel"></div>';
-                          }}
                         />
                       </div>
                     ) : (

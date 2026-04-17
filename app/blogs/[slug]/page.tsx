@@ -141,11 +141,6 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
                   src={blog.featuredImage}
                   alt={blog.title}
                   className="h-full w-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.parentElement!.innerHTML = '<div class="h-full w-full bg-gradient-panel"></div>';
-                  }}
                 />
               ) : (
                 <div className="h-full w-full bg-gradient-panel" />
