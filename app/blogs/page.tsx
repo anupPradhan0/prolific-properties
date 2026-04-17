@@ -80,7 +80,22 @@ export default async function Blogs({ searchParams }: { searchParams: Promise<{ 
                     key={post.id}
                     className="group overflow-hidden rounded-[28px] border border-border bg-surface shadow-panel transition-transform duration-300 hover:-translate-y-1"
                   >
-                    <div className="aspect-[4/3] bg-gradient-panel" />
+                    {post.featuredImage ? (
+                      <div className="aspect-[4/3] overflow-hidden">
+                        <img
+                          src={post.featuredImage}
+                          alt={post.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.parentElement!.innerHTML = '<div class="h-full w-full bg-gradient-panel"></div>';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-[4/3] bg-gradient-panel" />
+                    )}
                     <div className="p-6">
                       <div className="flex items-center gap-3 text-xs font-semibold">
                         <span className="rounded-full bg-primary-soft px-3 py-1 text-primary">{post.category}</span>

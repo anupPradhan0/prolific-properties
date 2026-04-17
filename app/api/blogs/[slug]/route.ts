@@ -45,20 +45,41 @@ export async function PUT(
       featuredImage, status, author, readTime, metaTitle, metaDescription
     } = body;
 
+    // If a new slug is provided, check if it already exists
+    if (body.slug && body.slug !== slug) {
+      const existingBlog = await prisma.blog.findUnique({
+        where: { slug: body.slug },
+      });
+
+      if (existingBlog) {
+        return NextResponse.json(
+          { error: "A blog post with this slug already exists. Please choose a different slug." },
+          { status: 409 }
+        );
+      }
+    }
+
+    const updateData: any = {
+      ...(title !== undefined && { title }),
+      ...(excerpt !== undefined && { excerpt }),
+      ...(content !== undefined && { content }),
+      ...(category !== undefined && { category }),
+      ...(featuredImage !== undefined && { featuredImage }),
+      ...(status !== undefined && { status }),
+      ...(author !== undefined && { author }),
+      ...(readTime !== undefined && { readTime }),
+      ...(metaTitle !== undefined && { metaTitle }),
+      ...(metaDescription !== undefined && { metaDescription }),
+    };
+
+    // Include slug update if provided
+    if (body.slug && body.slug !== slug) {
+      updateData.slug = body.slug;
+    }
+
     const blog = await prisma.blog.update({
       where: { slug },
-      data: {
-        ...(title !== undefined && { title }),
-        ...(excerpt !== undefined && { excerpt }),
-        ...(content !== undefined && { content }),
-        ...(category !== undefined && { category }),
-        ...(featuredImage !== undefined && { featuredImage }),
-        ...(status !== undefined && { status }),
-        ...(author !== undefined && { author }),
-        ...(readTime !== undefined && { readTime }),
-        ...(metaTitle !== undefined && { metaTitle }),
-        ...(metaDescription !== undefined && { metaDescription }),
-      },
+      data: updateData,
     });
 
     return NextResponse.json({ success: true, blog });

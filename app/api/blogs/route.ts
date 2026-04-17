@@ -11,12 +11,16 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
-    const status = searchParams.get("status") || "published";
+    const statusParam = searchParams.get("status");
     const limit = parseInt(searchParams.get("limit") || "100");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    const where: any = { status };
+    // If status is empty or "all", don't filter by status
+    const where: any = {};
     if (category) where.category = category;
+    if (statusParam && statusParam !== "" && statusParam !== "all") {
+      where.status = statusParam;
+    }
 
     const [blogs, total] = await Promise.all([
       prisma.blog.findMany({
@@ -25,7 +29,7 @@ export async function GET(request: NextRequest) {
         take: limit,
         skip: offset,
       }),
-      prisma.blog.count({ where: { status: "published" } }),
+      prisma.blog.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -61,6 +65,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Title and slug are required" },
         { status: 400 }
+      );
+    }
+
+    // Check if slug already exists
+    const existingBlog = await prisma.blog.findUnique({
+      where: { slug },
+    });
+
+    if (existingBlog) {
+      return NextResponse.json(
+        { error: "A blog post with this slug already exists. Please choose a different slug." },
+        { status: 409 }
       );
     }
 
