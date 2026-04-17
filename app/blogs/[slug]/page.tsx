@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import CTAStrip from "@/components/CTAStrip";
 import { Button } from "@/components/ui/button";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prolificproperties.in";
+
 async function getBlog(slug: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -46,12 +48,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: blog.metaTitle || `${blog.title} | Prolific Properties Blog`,
     description: blog.metaDescription || blog.excerpt,
+    alternates: {
+      canonical: `/blogs/${slug}`,
+    },
     openGraph: {
       title: blog.metaTitle || blog.title,
       description: blog.metaDescription || blog.excerpt,
       type: "article",
+      url: `/blogs/${slug}`,
       publishedTime: blog.createdAt,
+      modifiedTime: blog.updatedAt,
       authors: [blog.author],
+      images: blog.featuredImage ? [blog.featuredImage] : ["/og-image.svg"],
+      siteName: "Prolific Properties",
+      locale: "en_IN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.metaTitle || blog.title,
+      description: blog.metaDescription || blog.excerpt,
+      images: blog.featuredImage ? [blog.featuredImage] : ["/og-image.svg"],
     },
   };
 }
@@ -86,8 +102,10 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
     "@type": "Article",
     headline: blog.title,
     description: blog.excerpt,
+    mainEntityOfPage: `${siteUrl}/blogs/${blog.slug}`,
+    image: blog.featuredImage ? [blog.featuredImage] : [`${siteUrl}/og-image.svg`],
     author: {
-      "@type": "Organization",
+      "@type": "Person",
       name: blog.author || "Prolific Properties",
     },
     publisher: {
@@ -100,6 +118,8 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
     },
     datePublished: blog.createdAt,
     dateModified: blog.updatedAt,
+    articleSection: blog.category,
+    inLanguage: "en-IN",
   };
 
   return (

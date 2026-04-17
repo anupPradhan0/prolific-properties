@@ -5,9 +5,30 @@ import Footer from "@/components/Footer";
 import CTAStrip from "@/components/CTAStrip";
 import { Button } from "@/components/ui/button";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prolificproperties.in";
+
 export const metadata: Metadata = {
-  title: "Blogs",
-  description: "Read the latest insights on real estate in Bhubaneswar - property tips, market trends, and buying guides from Prolific Properties.",
+  title: "Real Estate Blog Bhubaneswar",
+  description:
+    "Read expert real estate insights, buying guides, legal tips, and market updates for Bhubaneswar from Prolific Properties.",
+  alternates: {
+    canonical: "/blogs",
+  },
+  openGraph: {
+    title: "Real Estate Blog | Prolific Properties",
+    description:
+      "Property buying, renting, legal, and market trend guides for Bhubaneswar home buyers and investors.",
+    url: "/blogs",
+    type: "website",
+    images: ["/og-image.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Real Estate Blog | Prolific Properties",
+    description:
+      "Actionable property insights for Bhubaneswar buyers, renters, and investors.",
+    images: ["/og-image.svg"],
+  },
 };
 
 const categories = [
@@ -35,9 +56,23 @@ async function getBlogs(category?: string) {
 export default async function Blogs({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const params = await searchParams;
   const blogs = await getBlogs(params.category);
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: blogs.map((post: any, index: number) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${siteUrl}/blogs/${post.slug}`,
+      name: post.title,
+    })),
+  };
 
   return (
     <div className="page-shell min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
       <Navbar />
       <main>
         <section className="py-12 md:py-16">
