@@ -7,6 +7,7 @@ import Sidebar from "@/components/admin/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 interface Blog {
   id: number;
@@ -153,18 +154,18 @@ export default function AdminBlogs() {
       if (res.ok) {
         setShowModal(false);
         fetchBlogs();
+        toast.success(editingBlog ? "Blog updated successfully" : "Blog created successfully");
       } else {
-        alert("Failed to save blog");
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to save blog");
       }
     } catch (error) {
       console.error("Error saving blog:", error);
-      alert("Failed to save blog");
+      toast.error("Failed to save blog");
     }
   };
 
-  const handleDelete = async (slug: string) => {
-    if (!confirm("Are you sure you want to delete this blog post?")) return;
-    
+  const deleteBlog = async (slug: string) => {
     const token = localStorage.getItem("adminToken");
     try {
       const res = await fetch(`/api/blogs/${slug}`, {
@@ -173,10 +174,23 @@ export default function AdminBlogs() {
       });
       if (res.ok) {
         fetchBlogs();
+        toast.success("Blog deleted successfully");
+      } else {
+        toast.error("Failed to delete blog");
       }
     } catch (error) {
       console.error("Error deleting blog:", error);
+      toast.error("Failed to delete blog");
     }
+  };
+
+  const handleDelete = (slug: string) => {
+    toast.warning("Delete this blog post?", {
+      action: {
+        label: "Delete",
+        onClick: () => deleteBlog(slug),
+      },
+    });
   };
 
   if (loading) {
@@ -204,7 +218,7 @@ export default function AdminBlogs() {
 
       <Sidebar />
 
-      <main className="pl-64 pt-16">
+      <main className="pt-16 md:pl-64">
         <div className="container py-8">
           <div className="flex items-center justify-between">
             <div>
@@ -215,7 +229,8 @@ export default function AdminBlogs() {
           </div>
 
           <div className="mt-8 overflow-hidden rounded-[24px] border border-border bg-surface shadow-panel">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px]">
               <thead className="bg-surface-strong">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Title</th>
@@ -248,6 +263,7 @@ export default function AdminBlogs() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </main>

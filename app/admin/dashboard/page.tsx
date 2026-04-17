@@ -90,7 +90,7 @@ export default function AdminDashboard() {
 
       <Sidebar />
 
-      <main className="pl-64 pt-16">
+      <main className="pt-16 md:pl-64">
         <div className="container py-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>

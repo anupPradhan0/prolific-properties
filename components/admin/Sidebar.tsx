@@ -14,7 +14,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r border-border bg-surface">
+    <aside className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-64 border-r border-border bg-surface md:block">
       <nav className="flex flex-col gap-1 p-4">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;

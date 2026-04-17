@@ -7,6 +7,7 @@ import Sidebar from "@/components/admin/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 interface Listing {
   id: number;
@@ -163,18 +164,18 @@ export default function AdminListings() {
       if (res.ok) {
         setShowModal(false);
         fetchListings();
+        toast.success(editingListing ? "Listing updated successfully" : "Listing created successfully");
       } else {
-        alert("Failed to save listing");
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to save listing");
       }
     } catch (error) {
       console.error("Error saving listing:", error);
-      alert("Failed to save listing");
+      toast.error("Failed to save listing");
     }
   };
 
-  const handleDelete = async (slug: string) => {
-    if (!confirm("Are you sure you want to delete this listing?")) return;
-    
+  const deleteListing = async (slug: string) => {
     const token = localStorage.getItem("adminToken");
     try {
       const res = await fetch(`/api/listings/${slug}`, {
@@ -183,10 +184,23 @@ export default function AdminListings() {
       });
       if (res.ok) {
         fetchListings();
+        toast.success("Listing deleted successfully");
+      } else {
+        toast.error("Failed to delete listing");
       }
     } catch (error) {
       console.error("Error deleting listing:", error);
+      toast.error("Failed to delete listing");
     }
+  };
+
+  const handleDelete = (slug: string) => {
+    toast.warning("Delete this listing?", {
+      action: {
+        label: "Delete",
+        onClick: () => deleteListing(slug),
+      },
+    });
   };
 
   if (loading) {
@@ -214,7 +228,7 @@ export default function AdminListings() {
 
       <Sidebar />
 
-      <main className="pl-64 pt-16">
+      <main className="pt-16 md:pl-64">
         <div className="container py-8">
           <div className="flex items-center justify-between">
             <div>
@@ -225,7 +239,8 @@ export default function AdminListings() {
           </div>
 
           <div className="mt-8 overflow-hidden rounded-[24px] border border-border bg-surface shadow-panel">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[860px]">
               <thead className="bg-surface-strong">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Property</th>
@@ -262,6 +277,7 @@ export default function AdminListings() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </main>

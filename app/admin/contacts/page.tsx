@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "@/components/admin/Sidebar";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Contact {
   id: number;
@@ -66,12 +67,13 @@ export default function AdminContacts() {
 
       if (res.ok) {
         fetchContacts(); // Refresh the list
+        toast.success("Contact status updated");
       } else {
-        alert("Failed to update contact status");
+        toast.error("Failed to update contact status");
       }
     } catch (error) {
       console.error("Error updating contact:", error);
-      alert("Failed to update contact status");
+      toast.error("Failed to update contact status");
     }
   };
 
@@ -125,7 +127,7 @@ export default function AdminContacts() {
 
       <Sidebar />
 
-      <main className="pl-64 pt-16">
+      <main className="pt-16 md:pl-64">
         <div className="container py-8">
           <div className="flex items-center justify-between">
             <div>
