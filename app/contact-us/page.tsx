@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTAStrip from "@/components/CTAStrip";
@@ -12,6 +12,7 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,7 +45,7 @@ export default function Contact() {
       }
 
       setSubmitted(true);
-      event.currentTarget.reset();
+      formRef.current?.reset();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -104,7 +105,7 @@ export default function Contact() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+              <form ref={formRef} onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="fullName" className="mb-2 block text-sm font-semibold text-foreground">

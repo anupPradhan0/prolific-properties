@@ -132,6 +132,11 @@ export default function AdminContacts() {
               <h1 className="text-3xl font-bold text-foreground">Contacts</h1>
               <p className="mt-1 text-muted-foreground">Manage contact form submissions</p>
             </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={fetchContacts}>
+                🔄 Refresh
+              </Button>
+            </div>
           </div>
 
           {/* Filter Tabs */}
