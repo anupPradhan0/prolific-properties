@@ -40,7 +40,7 @@ export default function Buy() {
                 <button
                   key={filter.value}
                   onClick={() => setActiveFilter(filter.value)}
-                  className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
+                  className={`min-h-11 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
                     activeFilter === filter.value
                       ? "bg-primary text-primary-foreground"
                       : "border border-border bg-surface text-muted-foreground hover:border-primary/30 hover:text-foreground"

@@ -17,7 +17,7 @@ const quickFacts = [
 ];
 
 const HeroSection = () => (
-  <section id="top" className="scroll-mt-24 pb-16 pt-10 md:pb-20 md:pt-16">
+  <section id="top" className="scroll-mt-24 pb-16 pt-8 md:pb-20 md:pt-12">
     <div className="container grid gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -36,11 +36,11 @@ const HeroSection = () => (
           Prolific Properties helps buyers, renters, and investors discover premium homes across Odisha with verified listings, clear pricing, and modern guidance from first visit to final paperwork.
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Button asChild size="xl">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Button asChild size="xl" className="w-full sm:w-auto">
             <a href="#listings">Explore listings</a>
           </Button>
-          <Button asChild variant="outline" size="xl">
+          <Button asChild variant="outline" size="xl" className="w-full sm:w-auto">
             <a href="#about">Our story</a>
           </Button>
         </div>

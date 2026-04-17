@@ -1,89 +1,261 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import Sidebar from "@/components/admin/Sidebar";
-import { Button } from "@/components/ui/button";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
+import AdminAuthGuard from "@/components/admin/AdminAuthGuard";
 
-export default function AdminDashboard() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalListings: 0,
-    forSale: 0,
-    forRent: 0,
-    blogPosts: 0,
-  });
+type RecentListing = {
+  id: number;
+  title: string;
+  slug: string;
+  createdAt: Date;
+  status: string;
+};
 
-  useEffect(() => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      router.push("/admin/login");
-    } else {
-      fetchStats();
-    }
-    setLoading(false);
-  }, [router]);
+type RecentBlog = {
+  id: number;
+  title: string;
+  slug: string;
+  createdAt: Date;
+  status: string;
+};
 
-  const fetchStats = async () => {
-    try {
-      const [listingsRes, blogsRes] = await Promise.all([
-        fetch("/api/listings?limit=1000"),
-        fetch("/api/blogs?limit=1000"),
-      ]);
+type RecentContact = {
+  id: number;
+  fullName: string;
+  interest: string;
+  createdAt: Date;
+  status: string;
+};
 
-      if (listingsRes.ok) {
-        const listingsData = await listingsRes.json();
-        const totalListings = listingsData.total || 0;
-        const forSale = listingsData.listings?.filter((l: any) => l.priceType === "sale").length || 0;
-        const forRent = listingsData.listings?.filter((l: any) => l.priceType === "rent").length || 0;
+type DashboardStats = {
+  totalListings: number;
+  forSale: number;
+  forRent: number;
+  blogPosts: number;
+  totalContacts: number;
+  activeContacts: number;
+};
 
-        setStats(prev => ({
-          ...prev,
-          totalListings,
-          forSale,
-          forRent,
-        }));
-      }
+async function getDashboardStats(): Promise<DashboardStats> {
+  const db = prisma as any;
 
-      if (blogsRes.ok) {
-        const blogsData = await blogsRes.json();
-        setStats(prev => ({
-          ...prev,
-          blogPosts: blogsData.total || 0,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    }
-  };
+  const [totalListings, forSale, forRent, blogPosts] = await Promise.all([
+    prisma.listing.count(),
+    prisma.listing.count({ where: { priceType: "sale" } }),
+    prisma.listing.count({ where: { priceType: "rent" } }),
+    prisma.blog.count(),
+  ]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminEmail");
-    router.push("/admin/login");
-  };
+  let totalContactsResult: Array<{ count: bigint | number }> = [];
+  let activeContactsResult: Array<{ count: bigint | number }> = [];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
+  try {
+    [totalContactsResult, activeContactsResult] = await Promise.all([
+      db.$queryRaw<Array<{ count: bigint | number }>>`SELECT COUNT(*)::bigint as count FROM contacts`,
+      db.$queryRaw<Array<{ count: bigint | number }>>`SELECT COUNT(*)::bigint as count FROM contacts WHERE status = 'active'`,
+    ]);
+  } catch {
+    totalContactsResult = [{ count: 0 }];
+    activeContactsResult = [{ count: 0 }];
   }
 
+  const totalContacts = Number(totalContactsResult?.[0]?.count ?? 0);
+  const activeContacts = Number(activeContactsResult?.[0]?.count ?? 0);
+
+  return {
+    totalListings,
+    forSale,
+    forRent,
+    blogPosts,
+    totalContacts,
+    activeContacts,
+  };
+}
+
+async function getRecentActivity() {
+  const db = prisma as any;
+
+  const [recentListings, recentBlogs] = await Promise.all([
+    prisma.listing.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, title: true, slug: true, createdAt: true, status: true },
+    }),
+    prisma.blog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, title: true, slug: true, createdAt: true, status: true },
+    }),
+  ]);
+
+  let recentContacts: Array<{ id: number; full_name: string; interest: string; created_at: Date; status: string }> = [];
+
+  try {
+    recentContacts = await db.$queryRaw<Array<{ id: number; full_name: string; interest: string; created_at: Date; status: string }>>`
+      SELECT id, full_name, interest, created_at, status
+      FROM contacts
+      ORDER BY created_at DESC
+      LIMIT 5
+    `;
+  } catch {
+    recentContacts = [];
+  }
+
+  const normalizedContacts: RecentContact[] = recentContacts.map((contact: { id: number; full_name: string; interest: string; created_at: Date; status: string }) => ({
+    id: contact.id,
+    fullName: contact.full_name,
+    interest: contact.interest,
+    createdAt: new Date(contact.created_at),
+    status: contact.status,
+  }));
+
+  return {
+    recentListings: recentListings as RecentListing[],
+    recentBlogs: recentBlogs as RecentBlog[],
+    recentContacts: normalizedContacts,
+  };
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded-3xl border border-border bg-surface p-6 shadow-panel">
+          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+          <div className="mt-4 h-10 w-16 animate-pulse rounded bg-muted" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RecentActivitySkeleton() {
+  return (
+    <div className="mt-10 grid gap-6 lg:grid-cols-3">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="rounded-3xl border border-border bg-surface p-6 shadow-panel">
+          <div className="h-5 w-36 animate-pulse rounded bg-muted" />
+          <div className="mt-4 space-y-3">
+            {Array.from({ length: 4 }).map((__, j) => (
+              <div key={j} className="h-4 w-full animate-pulse rounded bg-muted" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+async function StatsSection() {
+  const stats = await getDashboardStats();
+
+  const statCards = [
+    { label: "Total Listings", value: stats.totalListings, icon: "🏠" },
+    { label: "For Sale", value: stats.forSale, icon: "💰" },
+    { label: "For Rent", value: stats.forRent, icon: "🔑" },
+    { label: "Blog Posts", value: stats.blogPosts, icon: "📝" },
+    { label: "Total Contacts", value: stats.totalContacts, icon: "👥" },
+    { label: "Active Contacts", value: stats.activeContacts, icon: "📬" },
+  ];
+
+  return (
+    <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {statCards.map((stat) => (
+        <div key={stat.label} className="rounded-3xl border border-border bg-surface p-6 shadow-panel">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">{stat.label}</p>
+              <p className="mt-1 text-3xl font-bold text-foreground">{stat.value}</p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-xl">
+              {stat.icon}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+async function RecentActivitySection() {
+  const { recentListings, recentBlogs, recentContacts } = await getRecentActivity();
+
+  return (
+    <div className="mt-10 grid gap-6 lg:grid-cols-3">
+      <div className="rounded-3xl border border-border bg-surface p-6 shadow-panel">
+        <h2 className="text-xl font-bold text-foreground">Recent Listings</h2>
+        {recentListings.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No listings yet.</p>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {recentListings.map((listing: RecentListing) => (
+              <li key={listing.id} className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{listing.title}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(listing.createdAt).toLocaleDateString("en-IN")}</p>
+                </div>
+                <span className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground capitalize">{listing.status}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="rounded-3xl border border-border bg-surface p-6 shadow-panel">
+        <h2 className="text-xl font-bold text-foreground">Recent Blogs</h2>
+        {recentBlogs.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No blog posts yet.</p>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {recentBlogs.map((blog: RecentBlog) => (
+              <li key={blog.id} className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{blog.title}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(blog.createdAt).toLocaleDateString("en-IN")}</p>
+                </div>
+                <span className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground capitalize">{blog.status}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="rounded-3xl border border-border bg-surface p-6 shadow-panel">
+        <h2 className="text-xl font-bold text-foreground">Recent Contacts</h2>
+        {recentContacts.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No contact enquiries yet.</p>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {recentContacts.map((contact: RecentContact) => (
+              <li key={contact.id} className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{contact.fullName}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{contact.interest} • {new Date(contact.createdAt).toLocaleDateString("en-IN")}</p>
+                </div>
+                <span className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground capitalize">{contact.status}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 z-40 border-b border-border bg-surface">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-4">
+      <AdminAuthGuard />
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-surface">
+        <div className="container flex h-16 items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <Link href="/" className="text-lg font-bold text-foreground">Prolific Properties</Link>
-            <span className="text-sm text-muted-foreground">/ Admin</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-primary">View Site</Link>
-            <Button onClick={handleLogout} variant="outline" size="sm">Logout</Button>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">View Site</Link>
+            <AdminLogoutButton />
           </div>
         </div>
       </header>
@@ -94,75 +266,33 @@ export default function AdminDashboard() {
         <div className="container py-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="mt-1 text-muted-foreground">Welcome to Prolific Properties Admin</p>
+            <p className="mt-1 text-muted-foreground">Real-time overview from your database</p>
           </div>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-[24px] border border-border bg-surface p-6 shadow-panel">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Listings</p>
-                  <p className="mt-1 text-3xl font-bold text-foreground">6</p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center">
-                  <span className="text-xl">🏠</span>
-                </div>
-              </div>
-            </div>
+          <Suspense fallback={<StatsSkeleton />}>
+            <StatsSection />
+          </Suspense>
 
-            <div className="rounded-[24px] border border-border bg-surface p-6 shadow-panel">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">For Sale</p>
-                  <p className="mt-1 text-3xl font-bold text-foreground">{stats.forSale}</p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center">
-                  <span className="text-xl">💰</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[24px] border border-border bg-surface p-6 shadow-panel">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">For Rent</p>
-                  <p className="mt-1 text-3xl font-bold text-foreground">{stats.forRent}</p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center">
-                  <span className="text-xl">🔑</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[24px] border border-border bg-surface p-6 shadow-panel">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Blog Posts</p>
-                  <p className="mt-1 text-3xl font-bold text-foreground">{stats.blogPosts}</p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center">
-                  <span className="text-xl">📝</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Suspense fallback={<RecentActivitySkeleton />}>
+            <RecentActivitySection />
+          </Suspense>
 
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-foreground">Quick Actions</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <Link href="/admin/listings" className="rounded-[24px] border border-border bg-surface p-6 text-left shadow-panel transition-all hover:border-primary/30 hover:-translate-y-1">
+              <Link href="/admin/listings" className="rounded-3xl border border-border bg-surface p-6 shadow-panel transition-all hover:-translate-y-1 hover:border-primary/30">
                 <span className="text-2xl">➕</span>
                 <h3 className="mt-4 text-lg font-semibold text-foreground">Add New Listing</h3>
                 <p className="mt-2 text-sm text-muted-foreground">Create a new property listing</p>
               </Link>
 
-              <Link href="/admin/listings" className="rounded-[24px] border border-border bg-surface p-6 text-left shadow-panel transition-all hover:border-primary/30 hover:-translate-y-1">
+              <Link href="/admin/listings" className="rounded-3xl border border-border bg-surface p-6 shadow-panel transition-all hover:-translate-y-1 hover:border-primary/30">
                 <span className="text-2xl">✏️</span>
                 <h3 className="mt-4 text-lg font-semibold text-foreground">Manage Listings</h3>
                 <p className="mt-2 text-sm text-muted-foreground">Edit or delete property listings</p>
               </Link>
 
-              <Link href="/admin/blogs" className="rounded-[24px] border border-border bg-surface p-6 text-left shadow-panel transition-all hover:border-primary/30 hover:-translate-y-1">
+              <Link href="/admin/blogs" className="rounded-3xl border border-border bg-surface p-6 shadow-panel transition-all hover:-translate-y-1 hover:border-primary/30">
                 <span className="text-2xl">📝</span>
                 <h3 className="mt-4 text-lg font-semibold text-foreground">Manage Blog</h3>
                 <p className="mt-2 text-sm text-muted-foreground">Create and edit blog posts</p>

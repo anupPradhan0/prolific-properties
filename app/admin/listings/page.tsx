@@ -152,7 +152,7 @@ export default function AdminListings() {
         : "/api/listings";
       const method = editingListing ? "PUT" : "POST";
 
-      const res = await fetch(url, {
+      const requestPromise = fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -161,10 +161,17 @@ export default function AdminListings() {
         body: JSON.stringify(payload),
       });
 
+      toast.promise(requestPromise, {
+        loading: editingListing ? "Updating listing..." : "Creating listing...",
+        success: editingListing ? "Listing updated successfully" : "Listing created successfully",
+        error: "Failed to save listing",
+      });
+
+      const res = await requestPromise;
+
       if (res.ok) {
         setShowModal(false);
         fetchListings();
-        toast.success(editingListing ? "Listing updated successfully" : "Listing created successfully");
       } else {
         const data = await res.json().catch(() => ({}));
         toast.error(data.error || "Failed to save listing");
@@ -178,13 +185,21 @@ export default function AdminListings() {
   const deleteListing = async (slug: string) => {
     const token = localStorage.getItem("adminToken");
     try {
-      const res = await fetch(`/api/listings/${slug}`, {
+      const requestPromise = fetch(`/api/listings/${slug}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      toast.promise(requestPromise, {
+        loading: "Deleting listing...",
+        success: "Listing deleted successfully",
+        error: "Failed to delete listing",
+      });
+
+      const res = await requestPromise;
+
       if (res.ok) {
         fetchListings();
-        toast.success("Listing deleted successfully");
       } else {
         toast.error("Failed to delete listing");
       }

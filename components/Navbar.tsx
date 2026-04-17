@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 import logo from "@/assets/logo.png";
@@ -34,7 +34,7 @@ const Navbar = () => {
 
         <div className="hidden items-center gap-8 text-sm font-semibold text-muted-foreground lg:flex">
           {links.map((link) => (
-            <Link key={link.label} href={link.href} className="transition-colors hover:text-primary">
+            <Link key={link.label} href={link.href} className="inline-flex min-h-11 items-center transition-colors hover:text-primary">
               {link.label}
             </Link>
           ))}
@@ -58,27 +58,35 @@ const Navbar = () => {
         </div>
       </motion.nav>
 
-      {mobileOpen && (
-        <div className="border-t border-border bg-surface lg:hidden">
-          <div className="container flex flex-col gap-2 py-4">
-            {links.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-surface-strong hover:text-foreground"
-                onClick={() => setMobileOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Button asChild className="mt-2 sm:hidden">
-              <Link href="/contact-us" onClick={() => setMobileOpen(false)}>
-                Get in touch
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="overflow-hidden border-t border-border bg-surface lg:hidden"
+          >
+            <div className="container flex flex-col gap-2 py-4">
+              {links.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-surface-strong hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <Button asChild className="mt-2 sm:hidden">
+                <Link href="/contact-us" onClick={() => setMobileOpen(false)}>
+                  Get in touch
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

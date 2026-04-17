@@ -92,7 +92,7 @@ export default async function Blogs({ searchParams }: { searchParams: Promise<{ 
                 <Link
                   key={cat.value}
                   href={cat.value ? `/blogs?category=${cat.value}` : "/blogs"}
-                  className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
+                  className={`inline-flex min-h-11 items-center rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
                     params.category === cat.value || (!params.category && cat.value === "")
                       ? "bg-primary text-primary-foreground"
                       : "border border-border bg-surface text-muted-foreground hover:border-primary/30 hover:text-foreground"

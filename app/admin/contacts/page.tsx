@@ -56,7 +56,7 @@ export default function AdminContacts() {
   const handleStatusChange = async (contactId: number, newStatus: string) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await fetch("/api/contacts", {
+      const requestPromise = fetch("/api/contacts", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -65,9 +65,16 @@ export default function AdminContacts() {
         body: JSON.stringify({ id: contactId, status: newStatus }),
       });
 
+      toast.promise(requestPromise, {
+        loading: "Updating status...",
+        success: "Contact status updated",
+        error: "Failed to update contact status",
+      });
+
+      const res = await requestPromise;
+
       if (res.ok) {
         fetchContacts(); // Refresh the list
-        toast.success("Contact status updated");
       } else {
         toast.error("Failed to update contact status");
       }

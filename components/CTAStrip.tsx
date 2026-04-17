@@ -27,7 +27,7 @@ const CTAStrip = () => (
             </p>
           </div>
 
-          <Button asChild variant="secondary" size="xl" className="min-w-[220px] bg-surface text-foreground hover:bg-surface-tint">
+          <Button asChild variant="secondary" size="xl" className="w-full min-h-11 sm:w-auto sm:min-w-[220px] bg-surface text-foreground hover:bg-surface-tint">
             <a href="mailto:hello@prolificproperties.in">Schedule a call</a>
           </Button>
         </div>

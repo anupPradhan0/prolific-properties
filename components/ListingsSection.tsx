@@ -147,10 +147,6 @@ const ListingsSection = () => {
                       src={listing.imageUrl}
                       alt={listing.title}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                      }}
                     />
                   ) : null}
                   <div className={`absolute inset-0 bg-gradient-to-br from-surface-tint to-surface ${listing.imageUrl ? 'hidden' : ''}`} />
@@ -181,7 +177,7 @@ const ListingsSection = () => {
                       <p className="font-display text-[2.6rem] leading-none text-foreground">{listing.price}</p>
                       <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">{listing.description}</p>
                     </div>
-                    <Button asChild variant="secondary" size="sm">
+                    <Button asChild variant="secondary" size="sm" className="w-full sm:w-auto">
                       <Link href={`/buy/${listing.slug}`}>Details</Link>
                     </Button>
                   </div>

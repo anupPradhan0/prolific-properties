@@ -141,8 +141,7 @@ export default function AdminBlogs() {
         ? `/api/blogs/${editingBlog.slug}` 
         : "/api/blogs";
       const method = editingBlog ? "PUT" : "POST";
-
-      const res = await fetch(url, {
+      const requestPromise = fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -151,10 +150,17 @@ export default function AdminBlogs() {
         body: JSON.stringify(payload),
       });
 
+      toast.promise(requestPromise, {
+        loading: editingBlog ? "Updating blog..." : "Creating blog...",
+        success: editingBlog ? "Blog updated successfully" : "Blog created successfully",
+        error: "Failed to save blog",
+      });
+
+      const res = await requestPromise;
+
       if (res.ok) {
         setShowModal(false);
         fetchBlogs();
-        toast.success(editingBlog ? "Blog updated successfully" : "Blog created successfully");
       } else {
         const data = await res.json().catch(() => ({}));
         toast.error(data.error || "Failed to save blog");
@@ -168,13 +174,21 @@ export default function AdminBlogs() {
   const deleteBlog = async (slug: string) => {
     const token = localStorage.getItem("adminToken");
     try {
-      const res = await fetch(`/api/blogs/${slug}`, {
+      const requestPromise = fetch(`/api/blogs/${slug}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      toast.promise(requestPromise, {
+        loading: "Deleting blog...",
+        success: "Blog deleted successfully",
+        error: "Failed to delete blog",
+      });
+
+      const res = await requestPromise;
+
       if (res.ok) {
         fetchBlogs();
-        toast.success("Blog deleted successfully");
       } else {
         toast.error("Failed to delete blog");
       }

@@ -7,6 +7,7 @@ import CTAStrip from "@/components/CTAStrip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
@@ -31,13 +32,21 @@ export default function Contact() {
     };
 
     try {
-      const response = await fetch("/api/contact", {
+      const requestPromise = fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
+
+      toast.promise(requestPromise, {
+        loading: "Submitting your enquiry...",
+        success: "Enquiry submitted successfully",
+        error: "Failed to submit enquiry",
+      });
+
+      const response = await requestPromise;
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -46,8 +55,11 @@ export default function Contact() {
 
       setSubmitted(true);
       formRef.current?.reset();
+      toast.success("Thanks! We will contact you shortly.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
