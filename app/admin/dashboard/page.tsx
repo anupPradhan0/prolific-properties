@@ -9,14 +9,55 @@ import { Button } from "@/components/ui/button";
 export default function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalListings: 0,
+    forSale: 0,
+    forRent: 0,
+    blogPosts: 0,
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
     if (!token) {
       router.push("/admin/login");
+    } else {
+      fetchStats();
     }
     setLoading(false);
   }, [router]);
+
+  const fetchStats = async () => {
+    try {
+      const [listingsRes, blogsRes] = await Promise.all([
+        fetch("/api/listings?limit=1000"),
+        fetch("/api/blogs?limit=1000"),
+      ]);
+
+      if (listingsRes.ok) {
+        const listingsData = await listingsRes.json();
+        const totalListings = listingsData.total || 0;
+        const forSale = listingsData.listings?.filter((l: any) => l.priceType === "sale").length || 0;
+        const forRent = listingsData.listings?.filter((l: any) => l.priceType === "rent").length || 0;
+
+        setStats(prev => ({
+          ...prev,
+          totalListings,
+          forSale,
+          forRent,
+        }));
+      }
+
+      if (blogsRes.ok) {
+        const blogsData = await blogsRes.json();
+        setStats(prev => ({
+          ...prev,
+          blogPosts: blogsData.total || 0,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
@@ -73,7 +114,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">For Sale</p>
-                  <p className="mt-1 text-3xl font-bold text-foreground">3</p>
+                  <p className="mt-1 text-3xl font-bold text-foreground">{stats.forSale}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center">
                   <span className="text-xl">💰</span>
@@ -85,7 +126,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">For Rent</p>
-                  <p className="mt-1 text-3xl font-bold text-foreground">2</p>
+                  <p className="mt-1 text-3xl font-bold text-foreground">{stats.forRent}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center">
                   <span className="text-xl">🔑</span>
@@ -97,7 +138,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Blog Posts</p>
-                  <p className="mt-1 text-3xl font-bold text-foreground">6</p>
+                  <p className="mt-1 text-3xl font-bold text-foreground">{stats.blogPosts}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary-soft flex items-center justify-center">
                   <span className="text-xl">📝</span>

@@ -3,7 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { generateToken, comparePassword } from "@/lib/auth";
 
 const DEMO_USERS = [
-  { id: 1, email: "abhilash.panda8383@gmail.com", password: "abhilash8383" }
+  {
+    id: 1,
+    email: process.env.DEMO_ADMIN_EMAIL || "admin@prolificproperties.in",
+    password: process.env.DEMO_ADMIN_PASSWORD || "admin123"
+  }
 ];
 
 export async function POST(request: NextRequest) {

@@ -161,14 +161,13 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
                     <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold capitalize">
                       {listing.propertyType}
                     </span>
-                    )}
                     {listing.bathrooms && (
                       <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold">
                         {listing.bathrooms} Bath
                       </span>
                     )}
                     <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold capitalize">
-                      {listing.property_type}
+                      {listing.priceType}
                     </span>
                   </div>
 

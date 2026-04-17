@@ -45,7 +45,9 @@ const budgetConfig = {
   buy: { min: 10, max: 500, defaultMin: 40, defaultMax: 150, step: 5 },
   rent: { min: 5, max: 200, defaultMin: 20, defaultMax: 60, step: 5 },
   commercial: { min: 20, max: 700, defaultMin: 60, defaultMax: 300, step: 10 },
-};
+} as const;
+
+type BudgetIntent = keyof typeof budgetConfig;
 
 const formatSaleBudget = (valueInLakhs: number) => {
   if (valueInLakhs >= 100) {
@@ -65,7 +67,7 @@ const formatRentBudget = (valueInThousands: number) => `₹${valueInThousands}K`
 const FeaturesSection = () => {
   const searchParams = useSearchParams();
 
-  const initialIntent = tabs.find((tab) => tab.value === searchParams.get("intent"))?.value ?? "buy";
+  const initialIntent = (tabs.find((tab) => tab.value === searchParams.get("intent"))?.value ?? "buy") as BudgetIntent;
   const initialTabIndex = tabs.findIndex((tab) => tab.value === initialIntent);
   const initialType = propertyTypes.find((type) => type.value === searchParams.get("type"))?.value ?? "apartment";
   const initialTypeIndex = propertyTypes.findIndex((type) => type.value === initialType);
@@ -86,7 +88,7 @@ const FeaturesSection = () => {
     return Number.isFinite(parsedValue) ? parsedValue : defaultValue;
   });
 
-  const intent = tabs[activeTab]?.value ?? "buy";
+  const intent = (tabs[activeTab]?.value ?? "buy") as BudgetIntent;
   const budgetMeta = budgetConfig[intent];
   const budgetLabel = useMemo(() => {
     if (intent === "rent") {
@@ -97,7 +99,7 @@ const FeaturesSection = () => {
   }, [intent, maxBudget, minBudget]);
 
   const handleTabChange = (nextTabIndex: number) => {
-    const nextIntent = tabs[nextTabIndex].value;
+    const nextIntent = tabs[nextTabIndex]?.value as BudgetIntent | undefined;
 
     setActiveTab(nextTabIndex);
 

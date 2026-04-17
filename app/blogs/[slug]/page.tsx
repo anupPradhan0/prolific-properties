@@ -44,13 +44,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: blog.meta_title || `${blog.title} | Prolific Properties Blog`,
-    description: blog.meta_description || blog.excerpt,
+    title: blog.metaTitle || `${blog.title} | Prolific Properties Blog`,
+    description: blog.metaDescription || blog.excerpt,
     openGraph: {
-      title: blog.meta_title || blog.title,
-      description: blog.meta_description || blog.excerpt,
+      title: blog.metaTitle || blog.title,
+      description: blog.metaDescription || blog.excerpt,
       type: "article",
-      publishedTime: blog.created_at,
+      publishedTime: blog.createdAt,
       authors: [blog.author],
     },
   };
@@ -98,8 +98,8 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
         url: "https://www.prolificproperties.in/logo.png",
       },
     },
-    datePublished: blog.created_at,
-    dateModified: blog.updated_at,
+    datePublished: blog.createdAt,
+    dateModified: blog.updatedAt,
   };
 
   return (
@@ -129,9 +129,9 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
               <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
                 <span>By {blog.author}</span>
                 <span>•</span>
-                <span>{new Date(blog.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</span>
+                <span>{new Date(blog.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</span>
                 <span>•</span>
-                <span>{blog.read_time}</span>
+                <span>{blog.readTime}</span>
               </div>
             </div>
 
@@ -173,7 +173,7 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
                     </span>
                     <h3 className="mt-4 text-xl leading-tight text-foreground">{b.title}</h3>
                     <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{b.excerpt}</p>
-                    <p className="mt-4 text-xs text-muted-foreground">{b.read_time}</p>
+                    <p className="mt-4 text-xs text-muted-foreground">{b.readTime}</p>
                   </Link>
                 ))}
               </div>

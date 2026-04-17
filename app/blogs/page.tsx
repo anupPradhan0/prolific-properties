@@ -84,14 +84,14 @@ export default async function Blogs({ searchParams }: { searchParams: Promise<{ 
                     <div className="p-6">
                       <div className="flex items-center gap-3 text-xs font-semibold">
                         <span className="rounded-full bg-primary-soft px-3 py-1 text-primary">{post.category}</span>
-                        <span className="text-muted-foreground">{post.read_time}</span>
+                        <span className="text-muted-foreground">{post.readTime}</span>
                       </div>
                       <h2 className="mt-4 text-xl leading-tight text-foreground group-hover:text-primary transition-colors">
                         {post.title}
                       </h2>
                       <p className="mt-3 text-sm text-muted-foreground">{post.excerpt}</p>
                       <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">{new Date(post.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</span>
+                        <span className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</span>
                         <Button asChild variant="link" size="sm" className="text-primary">
                           <Link href={`/blogs/${post.slug}`}>Read more →</Link>
                         </Button>

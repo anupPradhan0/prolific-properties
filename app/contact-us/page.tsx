@@ -10,11 +10,46 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
-    event.currentTarget.reset();
+    setLoading(true);
+    setError("");
+
+    const formData = new FormData(event.currentTarget);
+    const data = {
+      fullName: formData.get("fullName"),
+      phone: formData.get("phone"),
+      email: formData.get("email"),
+      interest: formData.get("interest"),
+      budget: formData.get("budget"),
+      message: formData.get("message"),
+      consent: formData.get("consent") === "on",
+    };
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit form");
+      }
+
+      setSubmitted(true);
+      event.currentTarget.reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,6 +95,12 @@ export default function Contact() {
               {submitted && (
                 <div className="mt-5 rounded-2xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
                   Thanks. We received your request and will contact you shortly.
+                </div>
+              )}
+
+              {error && (
+                <div className="mt-5 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                  {error}
                 </div>
               )}
 
@@ -143,8 +184,8 @@ export default function Contact() {
                   </div>
                 </div>
 
-                <Button type="submit" size="xl" className="w-full">
-                  Submit enquiry
+                <Button type="submit" size="xl" className="w-full" disabled={loading}>
+                  {loading ? "Submitting..." : "Submit enquiry"}
                 </Button>
               </form>
             </div>

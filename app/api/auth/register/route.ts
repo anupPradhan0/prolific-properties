@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { hashPassword, generateToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -13,12 +13,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingUser = await query(
-      "SELECT id FROM users WHERE email = $1",
-      [email]
-    );
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    if (existingUser.rows.length > 0) {
+    if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
         { status: 400 }
@@ -26,12 +25,16 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await hashPassword(password);
-    const result = await query(
-      "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email",
-      [email, hashedPassword]
-    );
-
-    const user = result.rows[0];
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
     const token = generateToken(user.id, user.email);
 
     return NextResponse.json({
