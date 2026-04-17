@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prolificproperties.in";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Prolific Properties | Premium Real Estate in Bhubaneswar",
     template: "%s | Prolific Properties",
@@ -17,6 +20,9 @@ export const metadata: Metadata = {
     "commercial property Odisha",
   ],
   authors: [{ name: "Prolific Properties" }],
+  alternates: {
+    canonical: "/",
+  },
   robots: "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
   openGraph: {
     type: "website",
@@ -25,7 +31,7 @@ export const metadata: Metadata = {
     title: "Prolific Properties | Premium Real Estate in Bhubaneswar",
     description:
       "Explore curated sale, rental, and commercial properties with clearer filters, verified paperwork support, and better buying guidance.",
-    url: "https://www.prolificproperties.in/",
+    url: "/",
     images: [
       {
         url: "/og-image.svg",
@@ -37,10 +43,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@prolificproperties",
     title: "Prolific Properties | Premium Real Estate in Bhubaneswar",
     description: "Verified premium listings for buyers, renters, and commercial clients across Bhubaneswar.",
     images: ["/og-image.svg"],
   },
+  category: "Real Estate",
 };
 
 export default function RootLayout({
@@ -51,7 +59,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="canonical" href="https://www.prolificproperties.in/" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -60,17 +67,25 @@ export default function RootLayout({
               "@graph": [
                 {
                   "@type": "WebSite",
-                  "@id": "https://www.prolificproperties.in/#website",
-                  url: "https://www.prolificproperties.in/",
+                  "@id": `${siteUrl}/#website`,
+                  url: `${siteUrl}/`,
                   name: "Prolific Properties",
                   description: "Premium real estate discovery platform for Bhubaneswar and Odisha.",
                   inLanguage: "en-IN",
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: `${siteUrl}/buy?q={search_term_string}`,
+                    "query-input": "required name=search_term_string",
+                  },
                 },
                 {
                   "@type": "RealEstateAgent",
-                  "@id": "https://www.prolificproperties.in/#organization",
+                  "@id": `${siteUrl}/#organization`,
                   name: "Prolific Properties",
-                  url: "https://www.prolificproperties.in/",
+                  url: `${siteUrl}/`,
+                  logo: `${siteUrl}/logo.png`,
+                  email: "support@prolificproperties.in",
+                  telephone: "+91-99999-99999",
                   areaServed: {
                     "@type": "City",
                     name: "Bhubaneswar",

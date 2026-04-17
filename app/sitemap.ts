@@ -1,5 +1,50 @@
-export default function sitemap() {
+import { prisma } from "@/lib/prisma";
+
+export default async function sitemap() {
   const baseUrl = "https://www.prolificproperties.in";
+
+  let listingEntries: Array<{
+    url: string;
+    lastModified: Date;
+    changeFrequency: "daily";
+    priority: number;
+  }> = [];
+
+  let blogEntries: Array<{
+    url: string;
+    lastModified: Date;
+    changeFrequency: "weekly";
+    priority: number;
+  }> = [];
+
+  try {
+    const [listings, blogs] = await Promise.all([
+      prisma.listing.findMany({
+        where: { status: "active" },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.blog.findMany({
+        where: { status: "published" },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
+
+    listingEntries = listings.map((listing) => ({
+      url: `${baseUrl}/buy/${listing.slug}`,
+      lastModified: listing.updatedAt,
+      changeFrequency: "daily",
+      priority: 0.8,
+    }));
+
+    blogEntries = blogs.map((blog) => ({
+      url: `${baseUrl}/blogs/${blog.slug}`,
+      lastModified: blog.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.75,
+    }));
+  } catch {
+    // Fallback to static routes when DB is unavailable
+  }
 
   return [
     {
@@ -32,5 +77,7 @@ export default function sitemap() {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    ...listingEntries,
+    ...blogEntries,
   ];
 }

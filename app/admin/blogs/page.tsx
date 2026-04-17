@@ -19,6 +19,8 @@ interface Blog {
   author: string;
   readTime: string;
   featuredImage: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
 }
 
 export default function AdminBlogs() {
@@ -37,6 +39,8 @@ export default function AdminBlogs() {
     author: "Prolific Properties",
     readTime: "5 min read",
     featuredImage: "",
+    metaTitle: "",
+    metaDescription: "",
   });
 
   useEffect(() => {
@@ -82,6 +86,8 @@ export default function AdminBlogs() {
       author: "Prolific Properties",
       readTime: "5 min read",
       featuredImage: "",
+      metaTitle: "",
+      metaDescription: "",
     });
     setShowModal(true);
   };
@@ -98,6 +104,8 @@ export default function AdminBlogs() {
       author: blog.author || "Prolific Properties",
       readTime: blog.readTime || "5 min read",
       featuredImage: blog.featuredImage || "",
+      metaTitle: (blog as any).metaTitle || "",
+      metaDescription: (blog as any).metaDescription || "",
     });
     setShowModal(true);
   };
@@ -123,6 +131,8 @@ export default function AdminBlogs() {
       author: formData.author,
       readTime: formData.readTime,
       featuredImage: formData.featuredImage || null,
+      metaTitle: formData.metaTitle || null,
+      metaDescription: formData.metaDescription || null,
     };
 
     try {
@@ -366,6 +376,27 @@ export default function AdminBlogs() {
                       onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
                       placeholder="https://example.com/image.jpg"
                     />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold">Meta Title</label>
+                    <Input
+                      value={formData.metaTitle}
+                      onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
+                      placeholder="SEO title for search engines"
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">Leave blank to auto-generate from title</p>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold">Meta Description</label>
+                    <Textarea
+                      value={formData.metaDescription}
+                      onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+                      placeholder="SEO description for search engines..."
+                      rows={2}
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">Leave blank to auto-generate from excerpt</p>
                   </div>
 
                   <div className="flex gap-4 pt-4">
