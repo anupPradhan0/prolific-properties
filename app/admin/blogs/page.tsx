@@ -243,118 +243,142 @@ export default function AdminBlogs() {
       </main>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-surface p-8 shadow-panel">
-            <h2 className="text-2xl font-bold text-foreground">
-              {editingBlog ? "Edit Blog Post" : "Add New Blog Post"}
-            </h2>
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Title *</label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => {
-                      setFormData({ ...formData, title: e.target.value, slug: generateSlug(e.target.value) });
-                    }}
-                    placeholder="Blog post title"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Slug</label>
-                  <Input
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    placeholder="auto-generated-from-title"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold">Excerpt</label>
-                <Textarea
-                  value={formData.excerpt}
-                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                  placeholder="Brief description for listing page..."
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold">Content (HTML)</label>
-                <Textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Full blog content (HTML allowed)..."
-                  rows={10}
-                  className="font-mono text-sm"
-                />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
-                  >
-                    <option value="General">General</option>
-                    <option value="Buying Guide">Buying Guide</option>
-                    <option value="Market Insights">Market Insights</option>
-                    <option value="Legal Guide">Legal Guide</option>
-                    <option value="Renting Guide">Renting Guide</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Read Time</label>
-                  <Input
-                    value={formData.readTime}
-                    onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
-                    placeholder="e.g. 5 min read"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold">Author</label>
-                <Input
-                  value={formData.author}
-                  onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                  placeholder="Author name"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold">Featured Image URL</label>
-                <Input
-                  value={formData.featuredImage}
-                  onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)} className="flex-1">
-                  Cancel
-                </Button>
-                <Button type="submit" className="flex-1">
-                  {editingBlog ? "Update" : "Create"} Post
+        <div className="fixed inset-0 z-50 flex">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowModal(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative ml-auto w-full max-w-3xl bg-surface shadow-2xl h-full overflow-y-auto">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-border p-6">
+                <h2 className="text-2xl font-bold text-foreground">
+                  {editingBlog ? "Edit Blog Post" : "Add New Blog Post"}
+                </h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowModal(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  ✕
                 </Button>
               </div>
-            </form>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Title *</label>
+                      <Input
+                        value={formData.title}
+                        onChange={(e) => {
+                          setFormData({ ...formData, title: e.target.value, slug: generateSlug(e.target.value) });
+                        }}
+                        placeholder="Blog post title"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Slug</label>
+                      <Input
+                        value={formData.slug}
+                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        placeholder="auto-generated-from-title"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold">Excerpt</label>
+                    <Textarea
+                      value={formData.excerpt}
+                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                      placeholder="Brief description for listing page..."
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold">Content (HTML)</label>
+                    <Textarea
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      placeholder="Full blog content (HTML allowed)..."
+                      rows={10}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Category</label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
+                      >
+                        <option value="General">General</option>
+                        <option value="Buying Guide">Buying Guide</option>
+                        <option value="Market Insights">Market Insights</option>
+                        <option value="Legal Guide">Legal Guide</option>
+                        <option value="Renting Guide">Renting Guide</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Status</label>
+                      <select
+                        value={formData.status}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                        className="flex h-10 w-full rounded-2xl border border-input bg-surface px-4 text-sm"
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold">Read Time</label>
+                      <Input
+                        value={formData.readTime}
+                        onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
+                        placeholder="e.g. 5 min read"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold">Author</label>
+                    <Input
+                      value={formData.author}
+                      onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                      placeholder="Author name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold">Featured Image URL</label>
+                    <Input
+                      value={formData.featuredImage}
+                      onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button type="button" variant="outline" onClick={() => setShowModal(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="flex-1">
+                      {editingBlog ? "Update" : "Create"} Post
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
       )}

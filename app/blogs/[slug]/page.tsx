@@ -135,7 +135,22 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
               </div>
             </div>
 
-            <div className="mt-10 aspect-[16/9] rounded-[28px] bg-gradient-panel" />
+            <div className="mt-10 aspect-[16/9] rounded-[28px] overflow-hidden">
+              {blog.featuredImage ? (
+                <img
+                  src={blog.featuredImage}
+                  alt={blog.title}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.innerHTML = '<div class="h-full w-full bg-gradient-panel"></div>';
+                  }}
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-panel" />
+              )}
+            </div>
 
             <div 
               className="prose prose-lg max-w-none mt-10"
