@@ -1,4 +1,6 @@
 export default function robots() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
   return {
     rules: [
       {
@@ -12,7 +14,7 @@ export default function robots() {
         disallow: ["/admin/", "/api/", "/admin"],
       },
     ],
-    sitemap: "https://www.prolificproperties.in/sitemap.xml",
-    host: "https://www.prolificproperties.in",
+    sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   };
 }

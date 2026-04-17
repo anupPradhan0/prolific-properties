@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import CTAStrip from "@/components/CTAStrip";
 import { Button } from "@/components/ui/button";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prolificproperties.in";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 async function getBlog(slug: string) {
   try {
@@ -113,7 +113,7 @@ export default async function BlogDetail({ params }: { params: Promise<{ slug: s
       name: "Prolific Properties",
       logo: {
         "@type": "ImageObject",
-        url: "https://www.prolificproperties.in/logo.png",
+        url: `${siteUrl}/logo.png`,
       },
     },
     datePublished: blog.createdAt,

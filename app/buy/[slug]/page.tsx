@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import CTAStrip from "@/components/CTAStrip";
 import { Button } from "@/components/ui/button";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 async function getListing(slug: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -84,7 +86,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
     "@type": "RealEstateListing",
     name: listing.title,
     description: listing.description,
-    url: `https://www.prolificproperties.in/buy/${listing.slug}`,
+    url: `${siteUrl}/buy/${listing.slug}`,
     offers: {
       "@type": "Offer",
       price: listing.price?.toString() || "0",
