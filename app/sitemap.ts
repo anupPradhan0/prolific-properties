@@ -29,14 +29,14 @@ export default async function sitemap() {
       }),
     ]);
 
-    listingEntries = listings.map((listing) => ({
+    listingEntries = listings.map((listing: { slug: string; updatedAt: Date }) => ({
       url: `${baseUrl}/buy/${listing.slug}`,
       lastModified: listing.updatedAt,
       changeFrequency: "daily",
       priority: 0.8,
     }));
 
-    blogEntries = blogs.map((blog) => ({
+    blogEntries = blogs.map((blog: { slug: string; updatedAt: Date }) => ({
       url: `${baseUrl}/blogs/${blog.slug}`,
       lastModified: blog.updatedAt,
       changeFrequency: "weekly",
